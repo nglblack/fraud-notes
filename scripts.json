@@ -2,8 +2,7 @@
   "closingActions": [
     "Uploaded TIN Matching Tool",
     "Approved General Membership App",
-    "Sent to UW",
-    "Upload TIN Matching Tool"
+    "Sent to UW"
   ],
   "systemsReviewed": [
     "Symitar",
@@ -11,18 +10,108 @@
     "Alloy",
     "ID Scan",
     "LN",
-    "TIN Matching Tool"
+    "TIN Matching Tool",
+    "Chex"
   ],
   "scripts": [
+    {
+      "id": "script_1774817778447",
+      "title": "Identity Review — Full Walkthrough",
+      "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. {{#IF_CONCERNS=no}}Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. No identity concerns found. Advised the LO to proceed as normal.{{/IF_CONCERNS}}{{#IF_CONCERNS=yes}}for applicant {{APPLICANT_NAME}}. Concerns with identity found. {{DISCREPANCIES}}. Added condition(s): {{CONDITIONS}}. Advised LO {{LO_ADVICE}}.{{/IF_CONCERNS}} {{CLOSING}}",
+      "fields": [
+        {
+          "key": "LO_NAME",
+          "label": "LO Name",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "SYSTEMS_REVIEWED",
+          "label": "Systems Reviewed",
+          "type": "systems",
+          "placeholder": ""
+        },
+        {
+          "key": "CONCERNS",
+          "label": "Concerns Found?",
+          "type": "branch",
+          "placeholder": "",
+          "yesLabel": "Concerns Found",
+          "noLabel": "No Concerns",
+          "yesFields": [
+            {
+              "key": "DISCREPANCIES",
+              "label": "Findings / Discrepancies",
+              "type": "text",
+              "placeholder": ""
+            },
+            {
+              "key": "CONDITIONS",
+              "label": "Conditions Added",
+              "type": "text",
+              "placeholder": ""
+            },
+            {
+              "key": "LO_ADVICE",
+              "label": "Advice to LO",
+              "type": "chips",
+              "placeholder": "",
+              "options": [
+                "once condition is satisfied, we can proceed",
+                "fraud cannot recommend extending credit due to activity, but decision is up to LO manager/underwriting"
+              ]
+            },
+            {
+              "key": "APPLICANT_NAME",
+              "label": "Applicant Name",
+              "type": "text",
+              "placeholder": ""
+            }
+          ],
+          "noFields": [
+            {
+              "key": "APPLICANT_NAME",
+              "label": "Applicant Name",
+              "type": "text",
+              "placeholder": ""
+            }
+          ]
+        },
+        {
+          "key": "CLOSING",
+          "label": "Closing Actions",
+          "type": "closing",
+          "placeholder": ""
+        }
+      ]
+    },
     {
       "id": "flag-no-concerns",
       "title": "Application Flagged for Identity — No Concerns",
       "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. Advised the LO to proceed as normal. {{CLOSING}}",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" },
-        { "key": "SYSTEMS_REVIEWED", "label": "Systems Reviewed", "type": "systems" },
-        { "key": "APPLICANT_NAME", "label": "Applicant Name", "type": "text", "placeholder": "e.g. Jane Doe" },
-        { "key": "CLOSING", "label": "Closing Actions", "type": "closing" }
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "SYSTEMS_REVIEWED",
+          "label": "Systems Reviewed",
+          "type": "systems"
+        },
+        {
+          "key": "APPLICANT_NAME",
+          "label": "Applicant Name",
+          "type": "text",
+          "placeholder": "e.g. Jane Doe"
+        },
+        {
+          "key": "CLOSING",
+          "label": "Closing Actions",
+          "type": "closing"
+        }
       ]
     },
     {
@@ -30,15 +119,43 @@
       "title": "Application Flagged for Identity — Concerns Found",
       "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. Based on review discrepancies found with {{FINDINGS}}. Added condition(s) {{CONDITIONS}}. Advised LO {{LO_ADVICE}}. {{CLOSING}}",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" },
-        { "key": "SYSTEMS_REVIEWED", "label": "Systems Reviewed", "type": "systems" },
-        { "key": "FINDINGS", "label": "Findings / Discrepancies", "type": "text", "placeholder": "e.g. TIN mismatch, address inconsistency" },
-        { "key": "CONDITIONS", "label": "Conditions Added", "type": "text", "placeholder": "e.g. Step in BR with ID" },
-        { "key": "LO_ADVICE", "label": "Advice to LO", "type": "chips", "options": [
-          "once condition is satisfied, we can proceed",
-          "fraud cannot recommend extending credit due to activity, but decision is up to LO manager/underwriting"
-        ]},
-        { "key": "CLOSING", "label": "Closing Actions", "type": "closing" }
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "SYSTEMS_REVIEWED",
+          "label": "Systems Reviewed",
+          "type": "systems"
+        },
+        {
+          "key": "FINDINGS",
+          "label": "Findings / Discrepancies",
+          "type": "text",
+          "placeholder": "e.g. TIN mismatch, address inconsistency"
+        },
+        {
+          "key": "CONDITIONS",
+          "label": "Conditions Added",
+          "type": "text",
+          "placeholder": "e.g. Step in BR with ID"
+        },
+        {
+          "key": "LO_ADVICE",
+          "label": "Advice to LO",
+          "type": "chips",
+          "options": [
+            "once condition is satisfied, we can proceed",
+            "fraud cannot recommend extending credit due to activity, but decision is up to LO manager/underwriting"
+          ]
+        },
+        {
+          "key": "CLOSING",
+          "label": "Closing Actions",
+          "type": "closing"
+        }
       ]
     },
     {
@@ -46,14 +163,39 @@
       "title": "Application Flagged for Core Fraud Warning",
       "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Core Fraud warning. Reviewed Symitar, purpose of the fraud warning is on acct {{ACCT_NUM}} for member {{MEMBER_NAME}} due to {{WARNING_PURPOSE}}. Advised LO condition can be satisfied and {{LO_ADVICE}}.",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" },
-        { "key": "ACCT_NUM", "label": "Account Number", "type": "text", "placeholder": "e.g. 1234567" },
-        { "key": "MEMBER_NAME", "label": "Member Name", "type": "text", "placeholder": "e.g. Jane Doe" },
-        { "key": "WARNING_PURPOSE", "label": "Purpose of Warning", "type": "text", "placeholder": "e.g. suspected identity theft" },
-        { "key": "LO_ADVICE", "label": "Advice to LO", "type": "chips", "options": [
-          "fraud has no concerns",
-          "fraud cannot recommend extending credit due to activity, but decision is up to LO manager/underwriting"
-        ]}
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "ACCT_NUM",
+          "label": "Account Number",
+          "type": "text",
+          "placeholder": "e.g. 1234567"
+        },
+        {
+          "key": "MEMBER_NAME",
+          "label": "Member Name",
+          "type": "text",
+          "placeholder": "e.g. Jane Doe"
+        },
+        {
+          "key": "WARNING_PURPOSE",
+          "label": "Purpose of Warning",
+          "type": "text",
+          "placeholder": "e.g. suspected identity theft"
+        },
+        {
+          "key": "LO_ADVICE",
+          "label": "Advice to LO",
+          "type": "chips",
+          "options": [
+            "fraud has no concerns",
+            "fraud cannot recommend extending credit due to activity, but decision is up to LO manager/underwriting"
+          ]
+        }
       ]
     },
     {
@@ -61,7 +203,12 @@
       "title": "Application Misrouted — Chex Systems",
       "template": "Fraud Review: {{LO_NAME}} called in due to Chex Systems denied. Advised per KC Page 1004187 that Fraud does not approve Chex Systems and can review application for identity and to reach out to their Manager for assistance.",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" }
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        }
       ]
     },
     {
@@ -69,7 +216,12 @@
       "title": "Application Misrouted — Lending Application Approval",
       "template": "Fraud Review: {{LO_NAME}} called in due to looking for approval for lending application. Advised Fraud does not make lending decisions and to reach out to their Manager/Underwriting for assistance.",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" }
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        }
       ]
     },
     {
@@ -77,8 +229,18 @@
       "title": "Application Misrouted — Credit Report Watch",
       "template": "Fraud Review: {{LO_NAME}} called in due to Credit Report Watch for applicant {{APPLICANT_NAME}}. Advised agent must reach out to number on CR and confirm with individual they are applying and once this is completed they can proceed and update the status of condition.",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" },
-        { "key": "APPLICANT_NAME", "label": "Applicant Name", "type": "text", "placeholder": "e.g. Jane Doe" }
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "APPLICANT_NAME",
+          "label": "Applicant Name",
+          "type": "text",
+          "placeholder": "e.g. Jane Doe"
+        }
       ]
     },
     {
@@ -86,17 +248,49 @@
       "title": "ID Scan Failed No Concerns — New Membership",
       "template": "Fraud Review: {{LO_NAME}} called in due to ID Scan failing for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. No identity concerns. ID Scan failed due to {{FAIL_REASON}}. Applicant has attempted ID Scan {{ATTEMPT_COUNT}}, advised for applicant to attempt ID scan again. If applicant continues to fail after 3 attempts they will need to step in BR with ID to proceed. {{CLOSING}}",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" },
-        { "key": "APPLICANT_NAME", "label": "Applicant Name", "type": "text", "placeholder": "e.g. Jane Doe" },
-        { "key": "SYSTEMS_REVIEWED", "label": "Systems Reviewed", "type": "systems" },
-        { "key": "FAIL_REASON", "label": "Fail Reason", "type": "chips", "options": [
-          "video was blurry",
-          "bad lighting",
-          "barcode not legible",
-          "duplicate photo"
-        ]},
-        { "key": "ATTEMPT_COUNT", "label": "Attempt Count", "type": "chips", "options": ["1 time", "2 times", "3 times"] },
-        { "key": "CLOSING", "label": "Closing Actions", "type": "closing" }
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "APPLICANT_NAME",
+          "label": "Applicant Name",
+          "type": "text",
+          "placeholder": "e.g. Jane Doe"
+        },
+        {
+          "key": "SYSTEMS_REVIEWED",
+          "label": "Systems Reviewed",
+          "type": "systems"
+        },
+        {
+          "key": "FAIL_REASON",
+          "label": "Fail Reason",
+          "type": "chips",
+          "options": [
+            "video was blurry",
+            "bad lighting",
+            "barcode not legible",
+            "duplicate photo"
+          ]
+        },
+        {
+          "key": "ATTEMPT_COUNT",
+          "label": "Attempt Count",
+          "type": "chips",
+          "options": [
+            "1 time",
+            "2 times",
+            "3 times"
+          ]
+        },
+        {
+          "key": "CLOSING",
+          "label": "Closing Actions",
+          "type": "closing"
+        }
       ]
     },
     {
@@ -104,17 +298,49 @@
       "title": "ID Scan Failed No Concerns — Existing Member",
       "template": "Fraud Review: {{LO_NAME}} called in due to ID Scan failing for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. No identity concerns. ID Scan failed due to {{FAIL_REASON}}. Applicant has attempted ID Scan {{ATTEMPT_COUNT}}. Applicant is an existing established member with no fraud concerns, If applicant continues to fail after 3 attempts, they will need to step in BR with ID to proceed. {{CLOSING}}",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" },
-        { "key": "APPLICANT_NAME", "label": "Applicant Name", "type": "text", "placeholder": "e.g. Jane Doe" },
-        { "key": "SYSTEMS_REVIEWED", "label": "Systems Reviewed", "type": "systems" },
-        { "key": "FAIL_REASON", "label": "Fail Reason", "type": "chips", "options": [
-          "video was blurry",
-          "bad lighting",
-          "barcode not legible",
-          "duplicate photo"
-        ]},
-        { "key": "ATTEMPT_COUNT", "label": "Attempt Count", "type": "chips", "options": ["1 time", "2 times", "3 times"] },
-        { "key": "CLOSING", "label": "Closing Actions", "type": "closing" }
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "APPLICANT_NAME",
+          "label": "Applicant Name",
+          "type": "text",
+          "placeholder": "e.g. Jane Doe"
+        },
+        {
+          "key": "SYSTEMS_REVIEWED",
+          "label": "Systems Reviewed",
+          "type": "systems"
+        },
+        {
+          "key": "FAIL_REASON",
+          "label": "Fail Reason",
+          "type": "chips",
+          "options": [
+            "video was blurry",
+            "bad lighting",
+            "barcode not legible",
+            "duplicate photo"
+          ]
+        },
+        {
+          "key": "ATTEMPT_COUNT",
+          "label": "Attempt Count",
+          "type": "chips",
+          "options": [
+            "1 time",
+            "2 times",
+            "3 times"
+          ]
+        },
+        {
+          "key": "CLOSING",
+          "label": "Closing Actions",
+          "type": "closing"
+        }
       ]
     },
     {
@@ -122,13 +348,49 @@
       "title": "ID Scan Failed — Fraud Concerns",
       "template": "Fraud Review: {{LO_NAME}} called in to {{CALL_REASON}} for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. ID Scan failed and Concerns with identity found. {{DISCREPANCIES}} requesting applicant step in branch, added conditions {{CONDITIONS}} in order to proceed. {{CLOSING}}",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" },
-        { "key": "CALL_REASON", "label": "Called In To", "type": "chips", "options": ["review ID scan", "satisfy condition"] },
-        { "key": "APPLICANT_NAME", "label": "Applicant Name", "type": "text", "placeholder": "e.g. Jane Doe" },
-        { "key": "SYSTEMS_REVIEWED", "label": "Systems Reviewed", "type": "systems" },
-        { "key": "DISCREPANCIES", "label": "Discrepancies Found", "type": "text", "placeholder": "e.g. TIN was result code 3, TIN linked to multiple identities" },
-        { "key": "CONDITIONS", "label": "Conditions Added", "type": "text", "placeholder": "e.g. Step in BR with ID and POR" },
-        { "key": "CLOSING", "label": "Closing Actions", "type": "closing" }
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "CALL_REASON",
+          "label": "Called In To",
+          "type": "chips",
+          "options": [
+            "review ID scan",
+            "satisfy condition"
+          ]
+        },
+        {
+          "key": "APPLICANT_NAME",
+          "label": "Applicant Name",
+          "type": "text",
+          "placeholder": "e.g. Jane Doe"
+        },
+        {
+          "key": "SYSTEMS_REVIEWED",
+          "label": "Systems Reviewed",
+          "type": "systems"
+        },
+        {
+          "key": "DISCREPANCIES",
+          "label": "Discrepancies Found",
+          "type": "text",
+          "placeholder": "e.g. TIN was result code 3, TIN linked to multiple identities"
+        },
+        {
+          "key": "CONDITIONS",
+          "label": "Conditions Added",
+          "type": "text",
+          "placeholder": "e.g. Step in BR with ID and POR"
+        },
+        {
+          "key": "CLOSING",
+          "label": "Closing Actions",
+          "type": "closing"
+        }
       ]
     },
     {
@@ -136,11 +398,37 @@
       "title": "ID Scan Passed — No Fraud Concerns",
       "template": "Fraud Review: {{LO_NAME}} called in to {{CALL_REASON}} for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. Advised the LO to proceed as normal. {{CLOSING}}",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" },
-        { "key": "CALL_REASON", "label": "Called In To", "type": "chips", "options": ["review ID scan", "satisfy condition"] },
-        { "key": "APPLICANT_NAME", "label": "Applicant Name", "type": "text", "placeholder": "e.g. Jane Doe" },
-        { "key": "SYSTEMS_REVIEWED", "label": "Systems Reviewed", "type": "systems" },
-        { "key": "CLOSING", "label": "Closing Actions", "type": "closing" }
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "CALL_REASON",
+          "label": "Called In To",
+          "type": "chips",
+          "options": [
+            "review ID scan",
+            "satisfy condition"
+          ]
+        },
+        {
+          "key": "APPLICANT_NAME",
+          "label": "Applicant Name",
+          "type": "text",
+          "placeholder": "e.g. Jane Doe"
+        },
+        {
+          "key": "SYSTEMS_REVIEWED",
+          "label": "Systems Reviewed",
+          "type": "systems"
+        },
+        {
+          "key": "CLOSING",
+          "label": "Closing Actions",
+          "type": "closing"
+        }
       ]
     },
     {
@@ -148,13 +436,49 @@
       "title": "ID Scan Passed — Fraud Concerns Found",
       "template": "Fraud Review: {{LO_NAME}} called in to {{CALL_REASON}} for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. ID Scan passed however discrepancies found. Concerns with identity found. {{DISCREPANCIES}} requesting applicant step in branch, added conditions {{CONDITIONS}} in order to proceed. {{CLOSING}}",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" },
-        { "key": "CALL_REASON", "label": "Called In To", "type": "chips", "options": ["review ID scan", "satisfy condition"] },
-        { "key": "APPLICANT_NAME", "label": "Applicant Name", "type": "text", "placeholder": "e.g. Jane Doe" },
-        { "key": "SYSTEMS_REVIEWED", "label": "Systems Reviewed", "type": "systems" },
-        { "key": "DISCREPANCIES", "label": "Discrepancies Found", "type": "text", "placeholder": "e.g. TIN was result code 3, TIN linked to multiple identities" },
-        { "key": "CONDITIONS", "label": "Conditions Added", "type": "text", "placeholder": "e.g. Step in BR with ID and POR" },
-        { "key": "CLOSING", "label": "Closing Actions", "type": "closing" }
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "CALL_REASON",
+          "label": "Called In To",
+          "type": "chips",
+          "options": [
+            "review ID scan",
+            "satisfy condition"
+          ]
+        },
+        {
+          "key": "APPLICANT_NAME",
+          "label": "Applicant Name",
+          "type": "text",
+          "placeholder": "e.g. Jane Doe"
+        },
+        {
+          "key": "SYSTEMS_REVIEWED",
+          "label": "Systems Reviewed",
+          "type": "systems"
+        },
+        {
+          "key": "DISCREPANCIES",
+          "label": "Discrepancies Found",
+          "type": "text",
+          "placeholder": "e.g. TIN was result code 3, TIN linked to multiple identities"
+        },
+        {
+          "key": "CONDITIONS",
+          "label": "Conditions Added",
+          "type": "text",
+          "placeholder": "e.g. Step in BR with ID and POR"
+        },
+        {
+          "key": "CLOSING",
+          "label": "Closing Actions",
+          "type": "closing"
+        }
       ]
     },
     {
@@ -162,12 +486,44 @@
       "title": "Alloy Phone/Email Mismatch — Confirmed Fraud",
       "template": "Fraud Review: {{LO_NAME}} called to {{CALL_REASON}} for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Concerns with identity found. {{DISCREPANCIES}} Alloy phone/email mismatch, reached out to number ending in {{PHONE_LAST4}} via LN and confirmed with person that they did NOT apply for application. Advising LO we can no longer proceed with application and to deny application for unable to verify identity.",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" },
-        { "key": "CALL_REASON", "label": "Called In To", "type": "chips", "options": ["review ID scan", "satisfy condition"] },
-        { "key": "APPLICANT_NAME", "label": "Applicant Name", "type": "text", "placeholder": "e.g. Jane Doe" },
-        { "key": "SYSTEMS_REVIEWED", "label": "Systems Reviewed", "type": "systems" },
-        { "key": "DISCREPANCIES", "label": "Discrepancies Found", "type": "text", "placeholder": "e.g. TIN was result code 3, TIN linked to multiple identities" },
-        { "key": "PHONE_LAST4", "label": "Phone Last 4 Digits", "type": "text", "placeholder": "e.g. 4821" }
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "CALL_REASON",
+          "label": "Called In To",
+          "type": "chips",
+          "options": [
+            "review ID scan",
+            "satisfy condition"
+          ]
+        },
+        {
+          "key": "APPLICANT_NAME",
+          "label": "Applicant Name",
+          "type": "text",
+          "placeholder": "e.g. Jane Doe"
+        },
+        {
+          "key": "SYSTEMS_REVIEWED",
+          "label": "Systems Reviewed",
+          "type": "systems"
+        },
+        {
+          "key": "DISCREPANCIES",
+          "label": "Discrepancies Found",
+          "type": "text",
+          "placeholder": "e.g. TIN was result code 3, TIN linked to multiple identities"
+        },
+        {
+          "key": "PHONE_LAST4",
+          "label": "Phone Last 4 Digits",
+          "type": "text",
+          "placeholder": "e.g. 4821"
+        }
       ]
     },
     {
@@ -175,12 +531,43 @@
       "title": "Alloy Phone/Email Mismatch — Confirmed Not Fraud",
       "template": "Fraud Review: {{LO_NAME}} called to {{CALL_REASON}} for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Alloy flagged Phone/Email mismatch. Made outbound call to number in LN ending in {{PHONE_LAST4}} and made contact with applicant who confirmed application is valid. No further concerns. Advised the LO to proceed as normal. {{CLOSING}}",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" },
-        { "key": "CALL_REASON", "label": "Called In To", "type": "chips", "options": ["review ID scan", "satisfy condition"] },
-        { "key": "APPLICANT_NAME", "label": "Applicant Name", "type": "text", "placeholder": "e.g. Jane Doe" },
-        { "key": "SYSTEMS_REVIEWED", "label": "Systems Reviewed", "type": "systems" },
-        { "key": "PHONE_LAST4", "label": "Phone Last 4 Digits", "type": "text", "placeholder": "e.g. 4821" },
-        { "key": "CLOSING", "label": "Closing Actions", "type": "closing" }
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "CALL_REASON",
+          "label": "Called In To",
+          "type": "chips",
+          "options": [
+            "review ID scan",
+            "satisfy condition"
+          ]
+        },
+        {
+          "key": "APPLICANT_NAME",
+          "label": "Applicant Name",
+          "type": "text",
+          "placeholder": "e.g. Jane Doe"
+        },
+        {
+          "key": "SYSTEMS_REVIEWED",
+          "label": "Systems Reviewed",
+          "type": "systems"
+        },
+        {
+          "key": "PHONE_LAST4",
+          "label": "Phone Last 4 Digits",
+          "type": "text",
+          "placeholder": "e.g. 4821"
+        },
+        {
+          "key": "CLOSING",
+          "label": "Closing Actions",
+          "type": "closing"
+        }
       ]
     },
     {
@@ -188,11 +575,38 @@
       "title": "Alloy Phone/Email Mismatch — No Answer",
       "template": "Fraud Review: {{LO_NAME}} called to {{CALL_REASON}} for application {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Alloy flagged Phone/Email mismatch. Made outbound call to number in LN ending in {{PHONE_LAST4}}. No answer. Added conditions for applicant to step in BR with ID, POR and Physical (ITIN/SSC) in order to proceed with application.",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" },
-        { "key": "CALL_REASON", "label": "Called In To", "type": "chips", "options": ["review ID scan", "satisfy condition"] },
-        { "key": "APPLICANT_NAME", "label": "Applicant Name", "type": "text", "placeholder": "e.g. Jane Doe" },
-        { "key": "SYSTEMS_REVIEWED", "label": "Systems Reviewed", "type": "systems" },
-        { "key": "PHONE_LAST4", "label": "Phone Last 4 Digits", "type": "text", "placeholder": "e.g. 4821" }
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "CALL_REASON",
+          "label": "Called In To",
+          "type": "chips",
+          "options": [
+            "review ID scan",
+            "satisfy condition"
+          ]
+        },
+        {
+          "key": "APPLICANT_NAME",
+          "label": "Applicant Name",
+          "type": "text",
+          "placeholder": "e.g. Jane Doe"
+        },
+        {
+          "key": "SYSTEMS_REVIEWED",
+          "label": "Systems Reviewed",
+          "type": "systems"
+        },
+        {
+          "key": "PHONE_LAST4",
+          "label": "Phone Last 4 Digits",
+          "type": "text",
+          "placeholder": "e.g. 4821"
+        }
       ]
     },
     {
@@ -200,12 +614,40 @@
       "title": "No Condition — LO Calls In for Help",
       "template": "Fraud Review: {{LO_NAME}} called in due to {{LO_REQUEST}}. Reviewed {{SYSTEMS_REVIEWED}}. Based on findings {{FINDINGS}}. Advised LO {{NEXT_STEPS}}. {{CLOSING}}",
       "fields": [
-        { "key": "LO_NAME", "label": "LO Name & BR/Dept", "type": "text", "placeholder": "e.g. John Smith / BR 12" },
-        { "key": "LO_REQUEST", "label": "LO Request / Reason", "type": "text", "placeholder": "e.g. assistance with application review" },
-        { "key": "SYSTEMS_REVIEWED", "label": "Systems Reviewed", "type": "systems" },
-        { "key": "FINDINGS", "label": "Findings", "type": "text", "placeholder": "e.g. no identity concerns" },
-        { "key": "NEXT_STEPS", "label": "Next Steps / Advice", "type": "text", "placeholder": "e.g. proceed as normal" },
-        { "key": "CLOSING", "label": "Closing Actions", "type": "closing" }
+        {
+          "key": "LO_NAME",
+          "label": "LO Name & BR/Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "LO_REQUEST",
+          "label": "LO Request / Reason",
+          "type": "text",
+          "placeholder": "e.g. assistance with application review"
+        },
+        {
+          "key": "SYSTEMS_REVIEWED",
+          "label": "Systems Reviewed",
+          "type": "systems"
+        },
+        {
+          "key": "FINDINGS",
+          "label": "Findings",
+          "type": "text",
+          "placeholder": "e.g. no identity concerns"
+        },
+        {
+          "key": "NEXT_STEPS",
+          "label": "Next Steps / Advice",
+          "type": "text",
+          "placeholder": "e.g. proceed as normal"
+        },
+        {
+          "key": "CLOSING",
+          "label": "Closing Actions",
+          "type": "closing"
+        }
       ]
     }
   ]

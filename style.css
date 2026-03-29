@@ -503,3 +503,70 @@ textarea {
   border-radius: var(--radius-sm);
   transition: border-color 0.15s, background 0.15s;
 }
+
+/* ── BRANCH FIELD ── */
+.branch-toggle {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.branch-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  background: var(--bg);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text-muted);
+}
+
+.branch-btn:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
+  background: var(--surface2);
+}
+
+.branch-btn-safe.selected {
+  background: var(--green-dim);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.branch-btn-danger.selected {
+  background: rgba(247,111,111,0.1);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.branch-children {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  animation: fadeSlideIn 0.18s ease;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.field-group-indented {
+  padding-left: 12px;
+  border-left: 2px solid var(--border);
+}
+
+/* Branch child items in Manage editor */
+.field-editor-item-child {
+  background: var(--surface2);
+  border-color: var(--border);
+  margin-top: 2px;
+}
