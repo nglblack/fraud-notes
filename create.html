@@ -23,6 +23,13 @@
 
   <div class="page active">
 
+    <!-- Storage status bar -->
+    <div class="storage-banner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;flex-shrink:0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
+      Changes save automatically to your browser
+      <button class="btn btn-ghost btn-sm" id="btn-reset-storage" style="margin-left:auto;font-size:10px;padding:3px 8px">Reset to file</button>
+    </div>
+
     <!-- Import / Export -->
     <div class="card">
       <div class="card-header">
@@ -39,11 +46,11 @@
         </div>
       </div>
       <div class="card-body">
-        <p class="hint">Import a <code style="font-family:var(--mono);color:var(--accent)">scripts.json</code> file to load scripts, or export your current scripts to save them. Replace the <code style="font-family:var(--mono);color:var(--accent)">scripts.json</code> file in this folder to persist changes.</p>
+        <p class="hint">Your edits save automatically in this browser. Use <strong>Export</strong> to download a <code style="font-family:var(--mono);color:var(--accent)">scripts.json</code> backup, or <strong>Import</strong> to load one. <strong>Reset to file</strong> clears browser saves and reloads from <code style="font-family:var(--mono);color:var(--accent)">scripts.json</code>.</p>
       </div>
     </div>
 
-    <!-- Systems Reviewed Global Editor -->
+    <!-- Systems Reviewed -->
     <div class="card">
       <div class="card-header">
         <h3>Systems Reviewed</h3>
@@ -54,11 +61,11 @@
       </div>
       <div class="card-body">
         <div id="systems-chips-editor"></div>
-        <p class="hint" style="margin-top:8px">These appear as multi-select chips on scripts that use <code style="font-family:var(--mono);color:var(--yellow)">{{SYSTEMS_REVIEWED}}</code>. Selected items output as a plain comma-separated list.</p>
+        <p class="hint" style="margin-top:8px">These appear as multi-select chip buttons on any field with type <strong>systems</strong>. Output is a comma-separated list.</p>
       </div>
     </div>
 
-    <!-- Closing Actions Global Editor -->
+    <!-- Closing Actions -->
     <div class="card">
       <div class="card-header">
         <h3>Closing Actions</h3>
@@ -69,7 +76,7 @@
       </div>
       <div class="card-body">
         <div id="closing-chips-editor"></div>
-        <p class="hint" style="margin-top:8px">These appear as chip selectors on every script that has a <code style="font-family:var(--mono);color:var(--yellow)">{{CLOSING}}</code> field.</p>
+        <p class="hint" style="margin-top:8px">These appear as multi-select chip buttons on any field with type <strong>closing</strong>. Output is wrapped in parentheses.</p>
       </div>
     </div>
 
@@ -87,7 +94,7 @@
       </div>
     </div>
 
-    <!-- Editor (hidden until new/edit) -->
+    <!-- Script Editor (hidden until new/edit) -->
     <div class="card editor-section" id="editor-section">
       <div class="card-header">
         <h3 id="editor-heading">Edit Script</h3>
@@ -103,7 +110,7 @@
           </button>
         </div>
       </div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+      <div class="card-body" style="display:flex;flex-direction:column;gap:12px">
 
         <div class="field-group">
           <label>Script Title</label>
@@ -112,14 +119,25 @@
 
         <div class="field-group">
           <label>Template</label>
-          <p class="hint" style="margin-bottom:5px">Use <code style="font-family:var(--mono);color:var(--yellow)">{{PLACEHOLDER}}</code> for blanks. Use <code style="font-family:var(--mono);color:var(--yellow)">{{CLOSING}}</code> for closing actions.</p>
-          <textarea id="edit-template" rows="6" placeholder="Fraud Review: {{LO_NAME}} called in to ..."></textarea>
+          <p class="hint" style="margin-bottom:6px">Type your note text. Use <code style="font-family:var(--mono);color:var(--yellow)">{{PLACEHOLDER}}</code> anywhere you want a fill-in field. Use <code style="font-family:var(--mono);color:var(--yellow)">{{CLOSING}}</code> for closing actions and <code style="font-family:var(--mono);color:var(--yellow)">{{SYSTEMS_REVIEWED}}</code> for systems.</p>
+          <textarea id="edit-template" rows="6" placeholder="e.g. Fraud Review: {{LO_NAME}} called in to satisfy condition..."></textarea>
+        </div>
+
+        <!-- Live Preview -->
+        <div class="field-group">
+          <label>Preview</label>
+          <div class="preview-text" id="editor-preview" style="min-height:60px">
+            <span style="color:var(--text-dim);font-style:italic">Template preview will appear here…</span>
+          </div>
         </div>
 
         <div class="divider"></div>
 
-        <div class="card-header" style="padding:0;background:transparent;border:none;margin-bottom:4px">
-          <h3>Fields</h3>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div>
+            <div style="font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted)">Fields</div>
+            <div class="hint" style="margin-top:2px">Each field maps to a <code style="font-family:var(--mono);color:var(--yellow)">{{KEY}}</code> in your template.</div>
+          </div>
           <button class="btn btn-ghost btn-sm" id="btn-add-field">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Add Field

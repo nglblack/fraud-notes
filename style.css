@@ -433,3 +433,73 @@ textarea {
 }
 .row.end { justify-content: flex-end; }
 .row.between { justify-content: space-between; }
+
+/* ── STORAGE BANNER ── */
+.storage-banner {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  background: var(--green-dim);
+  border: 1px solid rgba(61,214,140,0.25);
+  border-radius: var(--radius);
+  font-size: 11.5px;
+  color: var(--green);
+  font-weight: 500;
+}
+
+/* ── CHIP EDITOR ROW ── */
+.chip-editor-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+.chip-editor-row input {
+  flex: 1;
+}
+.chip-editor-row:last-child {
+  margin-bottom: 0;
+}
+
+/* ── FIELD REORDER COLUMN ── */
+.field-editor-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.field-reorder {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.field-reorder .btn {
+  opacity: 0.5;
+}
+.field-reorder .btn:not(:disabled):hover {
+  opacity: 1;
+}
+.field-reorder .btn:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+/* ── SCRIPT LIST REORDER ── */
+.script-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.15s, background 0.15s;
+}
