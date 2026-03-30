@@ -1,7 +1,7 @@
 // ── USE PAGE ──
 
 let currentScript = null;
-let fieldValues = {}; // key -> value string
+let fieldValues = {};
 
 function initUsePage() {
   renderScriptSelect();
@@ -10,7 +10,6 @@ function initUsePage() {
   document.getElementById('btn-clear').addEventListener('click', onClear);
 }
 
-// ── POPULATE SELECT ──
 function renderScriptSelect() {
   const sel = document.getElementById('script-select');
   sel.innerHTML = '<option value="">— Choose a script —</option>';
@@ -22,7 +21,6 @@ function renderScriptSelect() {
   });
 }
 
-// ── SCRIPT SELECTED ──
 function onScriptChange(e) {
   const id = e.target.value;
   currentScript = AppState.data.scripts.find(s => s.id === id) || null;
@@ -35,7 +33,6 @@ function onScriptChange(e) {
 function renderFields() {
   const container = document.getElementById('fields-container');
   const emptyState = document.getElementById('fields-empty');
-
   if (!currentScript) {
     container.innerHTML = '';
     if (emptyState) emptyState.style.display = '';
@@ -43,10 +40,7 @@ function renderFields() {
   }
   if (emptyState) emptyState.style.display = 'none';
   container.innerHTML = '';
-
-  currentScript.fields.forEach(field => {
-    renderOneField(container, field);
-  });
+  currentScript.fields.forEach(field => renderOneField(container, field));
 }
 
 function renderOneField(container, field, indented) {
@@ -63,10 +57,7 @@ function renderOneField(container, field, indented) {
     inp.type = 'text';
     inp.placeholder = field.placeholder || '';
     inp.value = fieldValues[field.key] || '';
-    inp.addEventListener('input', () => {
-      fieldValues[field.key] = inp.value;
-      updatePreview();
-    });
+    inp.addEventListener('input', () => { fieldValues[field.key] = inp.value; updatePreview(); });
     group.appendChild(inp);
 
   } else if (field.type === 'chips') {
@@ -77,14 +68,8 @@ function renderOneField(container, field, indented) {
       chip.className = 'chip' + (fieldValues[field.key] === opt ? ' selected' : '');
       chip.textContent = opt;
       chip.addEventListener('click', () => {
-        if (fieldValues[field.key] === opt) {
-          delete fieldValues[field.key];
-          chip.classList.remove('selected');
-        } else {
-          fieldValues[field.key] = opt;
-          chips.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-          chip.classList.add('selected');
-        }
+        if (fieldValues[field.key] === opt) { delete fieldValues[field.key]; chip.classList.remove('selected'); }
+        else { fieldValues[field.key] = opt; chips.querySelectorAll('.chip').forEach(c => c.classList.remove('selected')); chip.classList.add('selected'); }
         updatePreview();
       });
       chips.appendChild(chip);
@@ -93,64 +78,68 @@ function renderOneField(container, field, indented) {
 
   } else if (field.type === 'systems') {
     renderSystemsField(group, field.key);
-
   } else if (field.type === 'closing') {
     renderClosingField(group, field.key);
-
   } else if (field.type === 'branch') {
-    renderBranchField(group, field, container);
+    renderBranchField(group, field);
   }
 
   container.appendChild(group);
 }
 
 // ── BRANCH FIELD ──
-function renderBranchField(group, field, container) {
-  const yesLabel = field.yesLabel || 'Yes';
-  const noLabel  = field.noLabel  || 'No';
-  const current  = fieldValues[field.key]; // 'yes' | 'no' | undefined
+// Supports any number of options via field.branches = [{value, label, fields[]}]
+// Also backward-compatible with old yes/no format
+function normalizeBranches(field) {
+  // New format: field.branches = [{value, label, fields}]
+  if (field.branches && field.branches.length) return field.branches;
+  // Old yes/no format — convert on the fly
+  return [
+    { value: 'no',  label: field.noLabel  || 'No',  fields: field.noFields  || [] },
+    { value: 'yes', label: field.yesLabel || 'Yes', fields: field.yesFields || [] },
+  ];
+}
+
+function renderBranchField(group, field) {
+  const branches = normalizeBranches(field);
+  const current  = fieldValues[field.key];
 
   const toggle = document.createElement('div');
   toggle.className = 'branch-toggle';
 
-  const makeBtn = (val, label, isRed) => {
+  branches.forEach((branch, idx) => {
     const btn = document.createElement('button');
-    btn.className = 'branch-btn' + (isRed ? ' branch-btn-danger' : ' branch-btn-safe') + (current === val ? ' selected' : '');
-    btn.textContent = label;
+    // First option = safe/green, last = danger/red, middle = neutral
+    const styleClass = idx === 0 ? 'branch-btn-safe'
+                     : idx === branches.length - 1 ? 'branch-btn-danger'
+                     : 'branch-btn-neutral';
+    btn.className = 'branch-btn ' + styleClass + (current === branch.value ? ' selected' : '');
+    btn.textContent = branch.label;
     btn.addEventListener('click', () => {
-      fieldValues[field.key] = val;
-      // Re-render so branch children appear/disappear
-      const fieldsContainer = document.getElementById('fields-container');
+      fieldValues[field.key] = branch.value;
       renderFields();
       updatePreview();
-      // Scroll to the newly revealed section
       setTimeout(() => {
-        const branchGroup = fieldsContainer.querySelector(`[data-field-key="${field.key}"]`);
-        if (branchGroup) branchGroup.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        const el = document.querySelector(`[data-field-key="${field.key}"]`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }, 50);
     });
-    return btn;
-  };
+    toggle.appendChild(btn);
+  });
 
-  toggle.appendChild(makeBtn('no',  noLabel,  false));
-  toggle.appendChild(makeBtn('yes', yesLabel, true));
   group.appendChild(toggle);
 
-  // Render child fields inline, right after this group, if a branch is selected
-  if (current === 'yes' && field.yesFields && field.yesFields.length) {
+  // Show child fields for whichever branch is selected
+  const selected = branches.find(b => b.value === current);
+  if (selected && selected.fields && selected.fields.length) {
     const childWrap = document.createElement('div');
     childWrap.className = 'branch-children';
-    field.yesFields.forEach(cf => renderOneField(childWrap, cf, true));
-    group.appendChild(childWrap);
-  } else if (current === 'no' && field.noFields && field.noFields.length) {
-    const childWrap = document.createElement('div');
-    childWrap.className = 'branch-children';
-    field.noFields.forEach(cf => renderOneField(childWrap, cf, true));
+    selected.fields.forEach(cf => renderOneField(childWrap, cf, true));
     group.appendChild(childWrap);
   }
 }
 
-// ── CLOSING ACTIONS FIELD ──
+// ── CLOSING / SYSTEMS FIELDS ──
 function renderClosingField(group, key) {
   if (!fieldValues[key]) fieldValues[key] = [];
   const chips = document.createElement('div');
@@ -171,7 +160,6 @@ function renderClosingField(group, key) {
   group.appendChild(chips);
 }
 
-// ── SYSTEMS REVIEWED FIELD ──
 function renderSystemsField(group, key) {
   if (!fieldValues[key]) fieldValues[key] = [];
   const chips = document.createElement('div');
@@ -192,20 +180,35 @@ function renderSystemsField(group, key) {
   group.appendChild(chips);
 }
 
-// ── RESOLVE TEMPLATE (shared by buildNote + updatePreview) ──
-// mode: 'plain' -> returns text string
-// mode: 'html'  -> returns html string with highlights
+// ── COLLECT ALL FIELDS (flattens all branch children) ──
+function collectAllFields(fields) {
+  const result = [];
+  function walk(arr) {
+    (arr || []).forEach(f => {
+      result.push(f);
+      if (f.branches) f.branches.forEach(b => walk(b.fields));
+      // backward compat
+      if (f.yesFields) walk(f.yesFields);
+      if (f.noFields)  walk(f.noFields);
+    });
+  }
+  walk(fields);
+  return result;
+}
+
+// ── RESOLVE TEMPLATE ──
 function resolveTemplate(template, fields, mode) {
-  // First handle conditional blocks:
-  // {{#IF_KEY=yes}}...{{/IF_KEY}} and {{#IF_KEY=no}}...{{/IF_KEY}}
   let text = template;
 
-  // Process all branch conditionals
-  text = text.replace(/\{\{#IF_([A-Z0-9_]+)=(yes|no)\}\}([\s\S]*?)\{\{\/IF_\1\}\}/g, (match, key, val, inner) => {
-    return fieldValues[key] === val ? inner : '';
-  });
+  // Handle {{#IF_KEY=value}}...{{/IF_KEY}} — resolve repeatedly to handle nested conditionals
+  let prev;
+  do {
+    prev = text;
+    text = text.replace(/\{\{#IF_([A-Z0-9_]+)=([a-z0-9_]+)\}\}([\s\S]*?)\{\{\/IF_\1\}\}/g, (match, key, val, inner) => {
+      return fieldValues[key] === val ? inner : '';
+    });
+  } while (text !== prev);
 
-  // Now resolve all {{PLACEHOLDER}} tokens
   const allFields = collectAllFields(fields);
   allFields.forEach(field => {
     const placeholder = `{{${field.key}}}`;
@@ -220,7 +223,7 @@ function resolveTemplate(template, fields, mode) {
       val = arr.join(', ');
       displayVal = val || null;
     } else if (field.type === 'branch') {
-      val = ''; displayVal = null; // branch itself doesn't output text
+      val = ''; displayVal = null;
     } else {
       val = fieldValues[field.key] || '';
       displayVal = val || null;
@@ -237,32 +240,15 @@ function resolveTemplate(template, fields, mode) {
     }
   });
 
-  // Clean up any leftover {{...}} in plain mode
-  if (mode === 'plain') {
-    text = text.replace(/\{\{[^}]+\}\}/g, '');
-  }
-
+  if (mode === 'plain') text = text.replace(/\{\{[^}]+\}\}/g, '');
   return text;
 }
 
-// Flatten nested yesFields/noFields into a single list for placeholder resolution
-function collectAllFields(fields) {
-  const result = [];
-  fields.forEach(f => {
-    result.push(f);
-    if (f.yesFields) f.yesFields.forEach(cf => result.push(cf));
-    if (f.noFields)  f.noFields.forEach(cf => result.push(cf));
-  });
-  return result;
-}
-
-// ── BUILD FINAL NOTE TEXT ──
 function buildNote() {
   if (!currentScript) return '';
   return resolveTemplate(currentScript.template, currentScript.fields, 'plain');
 }
 
-// ── LIVE PREVIEW ──
 function updatePreview() {
   const preview = document.getElementById('preview');
   if (!currentScript) {
@@ -276,21 +262,18 @@ function escapeHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ── COPY ──
 function onCopy() {
   const note = buildNote();
   if (!note.trim()) { showToast('Nothing to copy', 'error'); return; }
   copyToClipboard(note);
 }
 
-// ── CLEAR ──
 function onClear() {
   fieldValues = {};
   renderFields();
   updatePreview();
 }
 
-// ── INIT ──
 document.addEventListener('DOMContentLoaded', async () => {
   setActiveNav();
   await loadScripts();

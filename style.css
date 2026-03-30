@@ -570,3 +570,19 @@ textarea {
   border-color: var(--border);
   margin-top: 2px;
 }
+
+/* ── BRANCH NEUTRAL BUTTON (middle options) ── */
+.branch-btn-neutral {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+.branch-btn-neutral:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.branch-btn-neutral.selected {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
