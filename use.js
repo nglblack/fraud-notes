@@ -200,8 +200,18 @@ function collectAllFields(fields) {
 function resolveTemplate(template, fields, mode) {
   let text = template;
 
-  // Handle {{#IF_KEY=value}}...{{/IF_KEY}} — resolve repeatedly to handle nested conditionals
+  // Handle {{#IF_INCLUDES_SYSTEMS=Some System}}...{{/IF_INCLUDES_SYSTEMS}}
+  // Outputs inner text only if that system was selected
   let prev;
+  do {
+    prev = text;
+    text = text.replace(/\{\{#IF_INCLUDES_SYSTEMS=([^}]+)\}\}([\s\S]*?)\{\{\/IF_INCLUDES_SYSTEMS\}\}/g, (match, systemName, inner) => {
+      const selected = fieldValues['SYSTEMS_REVIEWED'] || [];
+      return selected.includes(systemName.trim()) ? inner : '';
+    });
+  } while (text !== prev);
+
+  // Handle {{#IF_KEY=value}}...{{/IF_KEY}} — resolve repeatedly to handle nested conditionals
   do {
     prev = text;
     text = text.replace(/\{\{#IF_([A-Z0-9_]+)=([a-z0-9_]+)\}\}([\s\S]*?)\{\{\/IF_\1\}\}/g, (match, key, val, inner) => {

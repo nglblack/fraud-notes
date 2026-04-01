@@ -90,7 +90,7 @@
     {
       "id": "identity-review-combined",
       "title": "Identity Review \u2014 Full Walkthrough",
-      "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. {{#IF_CONCERNS=no}}No identity concerns found. Advised the LO to proceed as normal.{{/IF_CONCERNS}}{{#IF_CONCERNS=yes}}Concerns with identity found. {{DISCREPANCIES}} Added condition(s): {{CONDITIONS}}. Advised LO {{LO_ADVICE}}.{{/IF_CONCERNS}} {{CLOSING}}",
+      "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. {{#IF_CONCERNS=no}}Based on review Name, DOB, Address{{#IF_INCLUDES_SYSTEMS=TIN Matching Tool}}, TIN{{/IF_INCLUDES_SYSTEMS}} were a match for applicant {{APPLICANT_NAME}}. No identity concerns found. Advised the LO to proceed as normal.{{/IF_CONCERNS}}{{#IF_CONCERNS=yes}}Reviewed for applicant {{APPLICANT_NAME}}. Concerns with identity found. {{DISCREPANCIES}} Added condition(s): {{CONDITIONS}}. Advised LO {{LO_ADVICE}}.{{/IF_CONCERNS}} {{CLOSING}}",
       "fields": [
         {
           "key": "LO_NAME",
@@ -473,7 +473,7 @@
     {
       "id": "alloy-mismatch-combined",
       "title": "Alloy Phone/Email Mismatch \u2014 Full Walkthrough",
-      "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Alloy flagged Phone/Email mismatch. Made outbound call to number in LN ending in {{PHONE_LAST4}}. {{#IF_OUTCOME=noanswer}}No answer. Added conditions for applicant to step in BR with ID, POR and Physical (ITIN/SSC) in order to proceed with application.{{/IF_OUTCOME}}{{#IF_OUTCOME=notfraud}}Made contact with applicant who confirmed application is valid. {{#IF_FURTHER=no}}No further concerns. Advised the LO to proceed as normal.{{/IF_FURTHER}}{{#IF_FURTHER=yes}}Further concerns found. {{FURTHER_CONCERNS}} Added condition(s): {{FURTHER_CONDITIONS}}. Advised LO to proceed once conditions are satisfied.{{/IF_FURTHER}} {{CLOSING}}{{/IF_OUTCOME}}{{#IF_OUTCOME=fraud}}Confirmed with person that they did NOT apply for application. Advising LO we can no longer proceed with application and to deny application for unable to verify identity.{{/IF_OUTCOME}}",
+      "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Alloy flagged Phone/Email mismatch. Made outbound call to number in LN ending in {{PHONE_LAST4}}. {{#IF_OUTCOME=noanswer}}No answer. Added conditions for applicant to step in BR with ID, POR and Physical (ITIN/SSC) in order to proceed with application.{{/IF_OUTCOME}}{{#IF_OUTCOME=notfraud}}Made contact with applicant who confirmed application is valid. {{#IF_FURTHER=no}}Based on review Name, DOB, Address{{#IF_INCLUDES_SYSTEMS=TIN Matching Tool}}, TIN{{/IF_INCLUDES_SYSTEMS}} were a match. No further concerns. Advised the LO to proceed as normal.{{/IF_FURTHER}}{{#IF_FURTHER=yes}}Further concerns found. {{FURTHER_CONCERNS}} Added condition(s): {{FURTHER_CONDITIONS}}. Advised LO to proceed once conditions are satisfied.{{/IF_FURTHER}} {{CLOSING}}{{/IF_OUTCOME}}{{#IF_OUTCOME=fraud}}Confirmed with person that they did NOT apply for application. Advising LO we can no longer proceed with application and to deny application for unable to verify identity.{{/IF_OUTCOME}}",
       "fields": [
         {
           "key": "LO_NAME",
