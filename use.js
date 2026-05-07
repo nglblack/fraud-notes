@@ -25,6 +25,10 @@ function onScriptChange(e) {
   const id = e.target.value;
   currentScript = AppState.data.scripts.find(s => s.id === id) || null;
   fieldValues = {};
+  if (currentScript) {
+    const sig = localStorage.getItem('fraudnotes_signature') || '';
+    if (sig) fieldValues['SIGNATURE'] = sig;
+  }
   renderFields();
   updatePreview();
 }
@@ -82,18 +86,16 @@ function renderOneField(container, field, indented) {
     renderClosingField(group, field.key);
   } else if (field.type === 'branch') {
     renderBranchField(group, field);
+  } else if (field.type === 'signature') {
+    renderSignatureField(group, field.key);
   }
 
   container.appendChild(group);
 }
 
 // ── BRANCH FIELD ──
-// Supports any number of options via field.branches = [{value, label, fields[]}]
-// Also backward-compatible with old yes/no format
 function normalizeBranches(field) {
-  // New format: field.branches = [{value, label, fields}]
   if (field.branches && field.branches.length) return field.branches;
-  // Old yes/no format — convert on the fly
   return [
     { value: 'no',  label: field.noLabel  || 'No',  fields: field.noFields  || [] },
     { value: 'yes', label: field.yesLabel || 'Yes', fields: field.yesFields || [] },
@@ -109,7 +111,6 @@ function renderBranchField(group, field) {
 
   branches.forEach((branch, idx) => {
     const btn = document.createElement('button');
-    // First option = safe/green, last = danger/red, middle = neutral
     const styleClass = idx === 0 ? 'branch-btn-safe'
                      : idx === branches.length - 1 ? 'branch-btn-danger'
                      : 'branch-btn-neutral';
@@ -129,7 +130,6 @@ function renderBranchField(group, field) {
 
   group.appendChild(toggle);
 
-  // Show child fields for whichever branch is selected
   const selected = branches.find(b => b.value === current);
   if (selected && selected.fields && selected.fields.length) {
     const childWrap = document.createElement('div');
@@ -137,6 +137,31 @@ function renderBranchField(group, field) {
     selected.fields.forEach(cf => renderOneField(childWrap, cf, true));
     group.appendChild(childWrap);
   }
+}
+
+// ── SIGNATURE FIELD ──
+function renderSignatureField(group, key) {
+  const saved = localStorage.getItem('fraudnotes_signature') || '';
+  if (!fieldValues[key]) fieldValues[key] = saved;
+
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.placeholder = 'e.g. AB-2119';
+  inp.value = fieldValues[key];
+
+  const hint = document.createElement('div');
+  hint.className = 'hint';
+  hint.style.marginTop = '5px';
+  hint.textContent = 'Auto-saved for this browser — enter once and it will remember you.';
+
+  inp.addEventListener('input', () => {
+    fieldValues[key] = inp.value;
+    localStorage.setItem('fraudnotes_signature', inp.value);
+    updatePreview();
+  });
+
+  group.appendChild(inp);
+  group.appendChild(hint);
 }
 
 // ── CLOSING / SYSTEMS FIELDS ──
@@ -187,7 +212,6 @@ function collectAllFields(fields) {
     (arr || []).forEach(f => {
       result.push(f);
       if (f.branches) f.branches.forEach(b => walk(b.fields));
-      // backward compat
       if (f.yesFields) walk(f.yesFields);
       if (f.noFields)  walk(f.noFields);
     });
@@ -196,12 +220,26 @@ function collectAllFields(fields) {
   return result;
 }
 
+// ── RESOLVE CALLER_SOURCE to human-readable text ──
+function resolveCallerSource(fields) {
+  const callerBranch = (fields || []).find(f => f.key === 'CALLER_SOURCE');
+  if (!callerBranch || !callerBranch.branches) return null;
+  const selected = callerBranch.branches.find(b => b.value === fieldValues['CALLER_SOURCE']);
+  if (!selected) return null;
+  if (selected.value === 'branch') {
+    return fieldValues['BRANCH_DETAIL'] ? 'Branch ' + fieldValues['BRANCH_DETAIL'] : 'Branch';
+  }
+  if (selected.value === 'other') {
+    return fieldValues['CALLER_SOURCE_CUSTOM'] || selected.label;
+  }
+  return selected.label;
+}
+
 // ── RESOLVE TEMPLATE ──
 function resolveTemplate(template, fields, mode) {
   let text = template;
 
   // Handle {{#IF_INCLUDES_SYSTEMS=Some System}}...{{/IF_INCLUDES_SYSTEMS}}
-  // Outputs inner text only if that system was selected
   let prev;
   do {
     prev = text;
@@ -211,7 +249,7 @@ function resolveTemplate(template, fields, mode) {
     });
   } while (text !== prev);
 
-  // Handle {{#IF_KEY=value}}...{{/IF_KEY}} — resolve repeatedly to handle nested conditionals
+  // Handle {{#IF_KEY=value}}...{{/IF_KEY}}
   do {
     prev = text;
     text = text.replace(/\{\{#IF_([A-Z0-9_]+)=([a-z0-9_]+)\}\}([\s\S]*?)\{\{\/IF_\1\}\}/g, (match, key, val, inner) => {
@@ -219,10 +257,43 @@ function resolveTemplate(template, fields, mode) {
     });
   } while (text !== prev);
 
+  // Resolve ZELLE_FLOW — auto-fills ISSUE, ACTION_TAKEN, ADVICE for linked analysis
+  const zelleBranch = (fields || []).find(f => f.key === 'ZELLE_FLOW');
+  if (zelleBranch && zelleBranch.branches) {
+    const selectedFlow = zelleBranch.branches.find(b => b.value === fieldValues['ZELLE_FLOW']);
+    if (selectedFlow && selectedFlow.value === 'linked_analysis') {
+      const autoFills = {
+        '{{ISSUE}}': 'linked analysis block',
+        '{{ACTION_TAKEN}}': 'removed linked analysis block',
+        '{{ADVICE}}': 'agent to assist with removing payees',
+      };
+      Object.entries(autoFills).forEach(([ph, val]) => {
+        if (mode === 'plain') {
+          text = text.split(ph).join(val);
+        } else {
+          text = text.split(ph).join(`<span style="color:var(--green)">${escapeHtml(val)}</span>`);
+        }
+      });
+    }
+  }
+
+  // Resolve CALLER_SOURCE specially
+  const callerSourceText = resolveCallerSource(fields);
+  if (callerSourceText !== null) {
+    if (mode === 'plain') {
+      text = text.split('{{CALLER_SOURCE}}').join(callerSourceText);
+    } else {
+      text = text.split('{{CALLER_SOURCE}}').join(`<span style="color:var(--green)">${escapeHtml(callerSourceText)}</span>`);
+    }
+  }
+
   const allFields = collectAllFields(fields);
   allFields.forEach(field => {
     const placeholder = `{{${field.key}}}`;
     let val, displayVal;
+
+    if (field.key === 'CALLER_SOURCE') return; // already handled above
+    if (field.key === 'ZELLE_FLOW') return;     // already handled above
 
     if (field.type === 'closing') {
       const arr = fieldValues[field.key] || [];
@@ -234,6 +305,9 @@ function resolveTemplate(template, fields, mode) {
       displayVal = val || null;
     } else if (field.type === 'branch') {
       val = ''; displayVal = null;
+    } else if (field.type === 'signature') {
+      val = fieldValues[field.key] ? fieldValues[field.key] + '\nFraud Intake Team' : '';
+      displayVal = val || null;
     } else {
       val = fieldValues[field.key] || '';
       displayVal = val || null;
