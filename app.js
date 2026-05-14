@@ -87,7 +87,28 @@ function importJSON(callback) {
 
 // ── COPY TO CLIPBOARD ──
 function copyToClipboard(text) {
-  if (navigator.clipboard) {
+  // Every line becomes its own <p>, blank lines become empty <p> for spacing
+  // Most reliable approach for Oracle/web CRMs that strip <br> tags
+  const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const html = '<!DOCTYPE html><html><body>' +
+    escaped.split(/\n/).map(line =>
+      line.trim() === ''
+        ? '<p style="margin:0">&nbsp;</p>'
+        : '<p style="margin:0">' + line + '</p>'
+    ).join('') +
+    '</body></html>';
+
+  if (navigator.clipboard && window.ClipboardItem) {
+    const item = new ClipboardItem({
+      'text/plain': new Blob([text], { type: 'text/plain' }),
+      'text/html':  new Blob([html],  { type: 'text/html' }),
+    });
+    navigator.clipboard.write([item]).then(() => showToast('Copied to clipboard ✓', 'success'))
+      .catch(() => {
+        // Fallback to plain text if write fails
+        navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard ✓', 'success'));
+      });
+  } else if (navigator.clipboard) {
     navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard ✓', 'success'));
   } else {
     const ta = document.createElement('textarea');
