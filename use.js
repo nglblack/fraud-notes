@@ -47,10 +47,6 @@ function onScriptChange(e) {
   currentScript = AppState.data.scripts.find(s => s.id === id) || null;
   fieldValues = {};
   universalAppScript = null;
-  if (currentScript) {
-    const sig = localStorage.getItem('fraudnotes_signature') || '';
-    if (sig) fieldValues['SIGNATURE'] = sig;
-  }
   renderFields();
   updatePreview();
 }
@@ -247,8 +243,6 @@ function renderAppSubPicker() {
 
   sel.addEventListener('change', () => {
     universalAppScript = AppState.data.scripts.find(s => s.id === sel.value) || null;
-    const sig = localStorage.getItem('fraudnotes_signature') || '';
-    if (sig && !fieldValues['SIGNATURE']) fieldValues['SIGNATURE'] = sig;
     // Pre-fill LO_NAME from AGENT_INTRO if agent call and not already set
     if (universalAppScript && fieldValues['AGENT_INTRO'] && !fieldValues['LO_NAME']) {
       fieldValues['LO_NAME'] = fieldValues['AGENT_INTRO'];
@@ -275,17 +269,16 @@ function renderAppSubPicker() {
 
 function renderSignatureField(group, key) {
   const saved = localStorage.getItem('fraudnotes_signature') || '';
-  if (!fieldValues[key]) fieldValues[key] = saved;
 
   const inp = document.createElement('input');
   inp.type = 'text';
-  inp.placeholder = 'e.g. AB-2119';
-  inp.value = fieldValues[key];
+  inp.placeholder = saved || 'e.g. AB-2119';
+  inp.value = fieldValues[key] || '';
 
   const hint = document.createElement('div');
   hint.className = 'hint';
   hint.style.marginTop = '5px';
-  hint.textContent = 'Auto-saved for this browser — enter once and it will remember you.';
+  hint.textContent = saved ? 'Remembered from last session — type to update.' : 'Enter once and it will be remembered for next time.';
 
   inp.addEventListener('input', () => {
     fieldValues[key] = inp.value;
