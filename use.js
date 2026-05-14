@@ -397,6 +397,7 @@ function resolveTemplate(template, fields, mode) {
 
   const allFields = collectAllFields(fields);
   allFields.forEach(field => {
+    if (field.outputIgnore) return; // display-only field, never in output
     const placeholder = `{{${field.key}}}`;
     let val, displayVal;
 

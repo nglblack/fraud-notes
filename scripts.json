@@ -11,7 +11,8 @@
     "Alloy",
     "ID Scan",
     "LN",
-    "TIN Matching Tool"
+    "TIN Matching Tool",
+    "Chex"
   ],
   "scripts": [
     {
@@ -51,33 +52,6 @@
           ]
         },
         {
-          "key": "MEMBER_NAME",
-          "label": "Member Name",
-          "type": "text",
-          "placeholder": "e.g. Jerod"
-        },
-        {
-          "key": "VERIFICATION",
-          "label": "Verification",
-          "type": "chips",
-          "options": [
-            "CWV",
-            "RGV",
-            "IDV",
-            "VID",
-            "RHQ",
-            "WRV",
-            "T1V",
-            "Not Verified"
-          ]
-        },
-        {
-          "key": "ACCT_NUM",
-          "label": "Account Number",
-          "type": "text",
-          "placeholder": "e.g. 1254854"
-        },
-        {
           "key": "CALL_TYPE",
           "label": "Call Type",
           "type": "branch",
@@ -86,6 +60,33 @@
               "value": "account",
               "label": "Account Review",
               "fields": [
+                {
+                  "key": "MEMBER_NAME",
+                  "label": "Member Name",
+                  "type": "text",
+                  "placeholder": "e.g. Jerod"
+                },
+                {
+                  "key": "VERIFICATION",
+                  "label": "Verification",
+                  "type": "chips",
+                  "options": [
+                    "CWV",
+                    "RGV",
+                    "IDV",
+                    "VID",
+                    "RHQ",
+                    "WRV",
+                    "T1V",
+                    "Not Verified"
+                  ]
+                },
+                {
+                  "key": "ACCT_NUM",
+                  "label": "Account Number",
+                  "type": "text",
+                  "placeholder": "e.g. 1254854"
+                },
                 {
                   "key": "QUICK_FILL",
                   "label": "Quick Fill",
@@ -120,20 +121,28 @@
                   "label": "Advised",
                   "type": "text",
                   "placeholder": "e.g. Advised mbr OLB is now accessible"
+                },
+                {
+                  "key": "SIGNATURE",
+                  "label": "Signature",
+                  "type": "signature"
                 }
               ]
             },
             {
               "value": "application",
               "label": "Application Review",
-              "fields": []
+              "fields": [
+                {
+                  "key": "APP_ID",
+                  "label": "Application ID",
+                  "type": "text",
+                  "placeholder": "e.g. JG5874",
+                  "outputIgnore": true
+                }
+              ]
             }
           ]
-        },
-        {
-          "key": "SIGNATURE",
-          "label": "Signature",
-          "type": "signature"
         }
       ]
     },
