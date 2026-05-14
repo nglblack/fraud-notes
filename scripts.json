@@ -18,7 +18,7 @@
     {
       "id": "universal-note",
       "title": "\u26a1 Universal Note",
-      "template": "{{#IF_CALLER=agent}}{{AGENT_INTRO}}, Mbr {{MEMBER_NAME}} {{VERIFICATION}} {{ACCT_NUM}}{{/IF_CALLER}}{{#IF_CALLER=member}}IBC from {{IBC_PHONE}}, Mbr {{MEMBER_NAME}} {{VERIFICATION}} {{ACCT_NUM}}{{/IF_CALLER}}\n\n{{#IF_CALL_TYPE=account}}{{ISSUE}}\n\n{{ACTION_TAKEN}}\n\n{{ADVICE}}\n\n{{SIGNATURE}}{{/IF_CALL_TYPE}}{{#IF_CALL_TYPE=application}}{{APP_SCRIPT_PLACEHOLDER}}{{/IF_CALL_TYPE}}",
+      "template": "{{#IF_CALLER=agent}}{{AGENT_INTRO}}, Mbr {{MEMBER_NAME}} {{VERIFICATION}} {{ACCT_NUM}}{{/IF_CALLER}}{{#IF_CALLER=member}}IBC from {{IBC_PHONE}}, Mbr {{MEMBER_NAME}} {{VERIFICATION}} {{ACCT_NUM}}{{/IF_CALLER}}\n\n{{#IF_CALL_TYPE=account}}{{ISSUE}}\n{{ACTION_TAKEN}}\n{{ADVICE}}\n\n{{SIGNATURE}}{{/IF_CALL_TYPE}}{{#IF_CALL_TYPE=application}}{{APP_SCRIPT_PLACEHOLDER}}{{/IF_CALL_TYPE}}",
       "fields": [
         {
           "key": "CALLER",

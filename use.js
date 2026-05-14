@@ -476,14 +476,14 @@ function updatePreview() {
   // Universal note + application path: just the sub-script note
   if (currentScript.id === 'universal-note' && fieldValues['CALL_TYPE'] === 'application') {
     if (universalAppScript) {
-      preview.innerHTML = resolveTemplate(universalAppScript.template, universalAppScript.fields, 'html');
+      preview.innerHTML = resolveTemplate(universalAppScript.template, universalAppScript.fields, 'html').replace(/\n/g, '<br>');
     } else {
       preview.innerHTML = '<span style="color:var(--text-dim);font-style:italic;">← Select an application script above</span>';
     }
     return;
   }
 
-  preview.innerHTML = resolveTemplate(currentScript.template, currentScript.fields, 'html');
+  preview.innerHTML = resolveTemplate(currentScript.template, currentScript.fields, 'html').replace(/\n/g, '<br>');
 }
 
 // Build just the header line for the universal note
