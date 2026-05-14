@@ -79,14 +79,18 @@ function renderOneField(container, field, indented) {
   group.appendChild(lbl);
 
   if (field.type === 'text') {
-    // Use textarea for the three universal account body fields for more writing room
+    // Auto-growing textarea for the three universal account body fields
     if (UNIVERSAL_HINTS[field.key]) {
       const ta = document.createElement('textarea');
-      ta.rows = 3;
+      ta.rows = 2;
+      ta.style.overflow = 'hidden';
+      ta.style.resize = 'none';
       ta.placeholder = field.placeholder || '';
       ta.value = fieldValues[field.key] || '';
-      ta.addEventListener('input', () => { fieldValues[field.key] = ta.value; updatePreview(); });
+      const autoGrow = () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; };
+      ta.addEventListener('input', () => { fieldValues[field.key] = ta.value; updatePreview(); autoGrow(); });
       group.appendChild(ta);
+      setTimeout(autoGrow, 0);
 
       const hintEl = document.createElement('div');
       hintEl.className = 'hint';
@@ -95,12 +99,33 @@ function renderOneField(container, field, indented) {
       group.appendChild(hintEl);
 
     } else {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.style.gap = '6px';
+
       const inp = document.createElement('input');
       inp.type = 'text';
       inp.placeholder = field.placeholder || '';
       inp.value = fieldValues[field.key] || '';
+      inp.style.flex = '1';
       inp.addEventListener('input', () => { fieldValues[field.key] = inp.value; updatePreview(); });
-      group.appendChild(inp);
+      row.appendChild(inp);
+
+      if (field.key === 'ACCT_NUM' || field.key === 'APP_ID') {
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'btn btn-ghost btn-sm';
+        copyBtn.style.flexShrink = '0';
+        copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+        copyBtn.title = 'Copy';
+        copyBtn.addEventListener('click', () => {
+          const val = inp.value.trim();
+          if (!val) { showToast('Nothing to copy', 'error'); return; }
+          copyToClipboard(val);
+        });
+        row.appendChild(copyBtn);
+      }
+
+      group.appendChild(row);
     }
   } else if (field.type === 'chips') {
     const chips = document.createElement('div');
