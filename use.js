@@ -269,16 +269,18 @@ function renderAppSubPicker() {
 
 function renderSignatureField(group, key) {
   const saved = localStorage.getItem('fraudnotes_signature') || '';
+  // Auto-populate fieldValues from saved so it appears in output without retyping
+  if (saved && !fieldValues[key]) fieldValues[key] = saved;
 
   const inp = document.createElement('input');
   inp.type = 'text';
-  inp.placeholder = saved || 'e.g. AB-2119';
+  inp.placeholder = 'e.g. AB-2119';
   inp.value = fieldValues[key] || '';
 
   const hint = document.createElement('div');
   hint.className = 'hint';
   hint.style.marginTop = '5px';
-  hint.textContent = saved ? 'Remembered from last session — type to update.' : 'Enter once and it will be remembered for next time.';
+  hint.textContent = saved ? 'Remembered — type to update.' : 'Enter once and it will be remembered for next time.';
 
   inp.addEventListener('input', () => {
     fieldValues[key] = inp.value;
