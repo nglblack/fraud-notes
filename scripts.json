@@ -61,6 +61,12 @@
               "label": "Account Review",
               "fields": [
                 {
+                  "key": "ACCT_NUM",
+                  "label": "Account Number",
+                  "type": "text",
+                  "placeholder": "e.g. 1254854"
+                },
+                {
                   "key": "MEMBER_NAME",
                   "label": "Member Name",
                   "type": "text",
@@ -80,12 +86,6 @@
                     "T1V",
                     "Not Verified"
                   ]
-                },
-                {
-                  "key": "ACCT_NUM",
-                  "label": "Account Number",
-                  "type": "text",
-                  "placeholder": "e.g. 1254854"
                 },
                 {
                   "key": "QUICK_FILL",
