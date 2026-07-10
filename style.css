@@ -185,13 +185,19 @@ textarea {
 .field-group:last-child { margin-bottom: 0; }
 
 /* ── CHIPS ── */
-.chips {
+/* .branch-toggle-compact is the wrapper for compact-style branch fields (e.g. LO_ADVICE) — same
+   flex-wrap pill-row layout as .chips, just a distinct class since it wraps branch buttons, not
+   actual chips-type fields. */
+.chips, .branch-toggle-compact {
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
 }
 
-.chip {
+/* .chip-branch gives compact branch-field buttons (e.g. LO_ADVICE) the exact same pill look as
+   .chip, without literally being a chips-type field — kept as a separate class since it wraps
+   branch value/label semantics, not chip option semantics. */
+.chip, .chip-branch {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -205,12 +211,15 @@ textarea {
   cursor: pointer;
   transition: all 0.15s;
   user-select: none;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
 }
 
-.chip:hover { border-color: var(--accent); color: var(--text); }
+.chip:hover, .chip-branch:hover { border-color: var(--accent); color: var(--text); }
 
-.chip.selected {
+.chip.selected, .chip-branch.selected {
   background: var(--accent-dim);
   border-color: var(--accent);
   color: var(--accent);
@@ -400,6 +409,41 @@ textarea {
 }
 #toast.success { border-color: var(--green); color: var(--green); }
 #toast.error { border-color: var(--red); color: var(--red); }
+
+/* ── COMPACT SELECT (e.g. the Preview card's whole-note font/size controls) ── */
+.select-compact {
+  width: auto;
+  font-size: 12px;
+  padding: 6px 24px 6px 8px;
+  background-position: right 6px center;
+}
+
+/* ── NOTE FIELD GROUP (ISSUE/ACTION_TAKEN/ADVICE-style fields, grouped with their own small toolbar) ── */
+.note-fields-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+.note-fields-group:last-child { margin-bottom: 0; }
+
+.format-toolbar-inline {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  width: 100%;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── PREVIEW BULLET LIST (live preview only — clipboard/export keeps flat "• " lines instead) ── */
+.preview-bullets {
+  margin: 2px 0;
+  padding-left: 20px;
+}
+.preview-bullets li {
+  margin: 2px 0;
+}
 
 /* ── EMPTY STATE ── */
 .empty-state {

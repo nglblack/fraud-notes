@@ -2,8 +2,7 @@
   "closingActions": [
     "Uploaded TIN Matching Tool",
     "Approved General Membership App",
-    "Sent to UW",
-    "Upload TIN Matching Tool"
+    "Sent to UW"
   ],
   "systemsReviewed": [
     "Keystone",
@@ -13,6 +12,184 @@
     "LN",
     "TIN Matching Tool",
     "Chex"
+  ],
+  "quickFillCategories": [
+    {
+      "category": "Zelle",
+      "scripts": [
+        {
+          "value": "zelle_linked",
+          "label": "Linked Analysis",
+          "fills": {
+            "ISSUE": "Mbr calling with issues related to Zelle. Issue: linked analysis block.",
+            "ACTION_TAKEN": "Reviewed and removed linked analysis block.",
+            "ADVICE": "Advised agent to assist mbr with removing payees."
+          }
+        },
+        {
+          "value": "zelle_la_to_fa",
+          "label": "LA to FA",
+          "fills": {
+            "ISSUE": "Mbr called in about a payee showing as linked to fraud.",
+            "ACTION_TAKEN": "Reviewed and unblocked the payee.",
+            "ADVICE": "Advised agent to have mbr delete the payee."
+          }
+        },
+        {
+          "value": "zelle_cst_fraud_reported",
+          "label": "Cst Fraud Reported",
+          "fills": {
+            "ISSUE": "Mbr called in about their profile being blocked by FIS due to fraud reported against them.",
+            "ACTION_TAKEN": "Reviewed and interviewed the mbr."
+          }
+        },
+        {
+          "value": "zelle_sp_alert",
+          "label": "SP Alert",
+          "fills": {
+            "ISSUE": "Mbr called in about their profile showing RT-Fraud.",
+            "ACTION_TAKEN": "Reviewed and cleared the alert in SP and added mbr to WP WL."
+          }
+        },
+        {
+          "value": "zelle_organizational_request",
+          "label": "Organizational Request",
+          "fills": {
+            "ISSUE": "Mbr called in about their profile being blocked due to an organization request.",
+            "ACTION_TAKEN": "Reviewed and interviewed the mbr.",
+            "ADVICE": "Advised agent a determination was made to email FIS about unblocking the profile."
+          }
+        },
+        {
+          "value": "zelle_blocked_enrollment",
+          "label": "Blocked Enrollment",
+          "fills": {
+            "ISSUE": "Mbr called in about (what is on block list).",
+            "ADVICE": "Advised agent I would email FIS to see about removing from the block list; no timeframe on when FIS will respond."
+          }
+        },
+        {
+          "value": "zelle_bill_pay",
+          "label": "Bill Pay",
+          "fills": {
+            "ADVICE": "Advised agent to talk to BRE."
+          }
+        }
+      ]
+    },
+    {
+      "category": "Visa",
+      "scripts": [
+        {
+          "value": "visa_hard_suppression",
+          "label": "Hard Suppression",
+          "fills": {
+            "ISSUE": "Mbr called in about transaction (amount, CC number) continuing to decline after RF were adjusted.",
+            "ACTION_TAKEN": "Reviewed and took over the call, double T2V'd, and asked mbr for permission to remove FM from the card so the transaction could be approved. Transaction was successful (merchant, amount, CCM).",
+            "ADVICE": "Advised agent FM was put back on the card."
+          }
+        },
+        {
+          "value": "visa_payment_support_questions",
+          "label": "Payment Support Questions",
+          "fills": {
+            "ISSUE": "Mbr called in about needing guidance on Visa."
+          }
+        },
+        {
+          "value": "visa_falcon",
+          "label": "Falcon",
+          "fills": {
+            "ISSUE": "Mbr called in about clearing a Falcon alert."
+          }
+        },
+        {
+          "value": "visa_rf_adjustment",
+          "label": "RF Adjustment",
+          "fills": {
+            "ACTION_TAKEN": "Reviewed and adjusted RF card# (enter RF).",
+            "ADVICE": "Advised mbr to try again; transaction was successful."
+          }
+        },
+        {
+          "value": "visa_vcas",
+          "label": "VCAS",
+          "fills": {
+            "ISSUE": "Mbr called in about a transaction flagging in VBV.",
+            "ACTION_TAKEN": "Reviewed and took over the call, double T2V'd, marked the transaction as good, and started bypass for (transaction, amount, card number)."
+          }
+        },
+        {
+          "value": "visa_merchant",
+          "label": "Merchant",
+          "fills": {
+            "ISSUE": "Mbr called in about a transaction not getting approved, not on MACU's side.",
+            "ADVICE": "Advised mbr to reach out to the merchant."
+          }
+        },
+        {
+          "value": "visa_misdirected",
+          "label": "Misdirected",
+          "fills": {
+            "ISSUE": "Mbr called in about a transaction that is not a fraud-related issue."
+          }
+        }
+      ]
+    },
+    {
+      "category": "Conversions",
+      "scripts": [
+        {
+          "value": "conversions_doc_questions",
+          "label": "Doc Questions",
+          "fills": {
+            "ISSUE": "Mbr called in with questions on required docs."
+          }
+        },
+        {
+          "value": "conversions_personal_acct",
+          "label": "Personal Acct",
+          "fills": {
+            "ISSUE": "Mbr called in with questions on a personal acct conversion."
+          }
+        },
+        {
+          "value": "conversions_business_acct",
+          "label": "Business Acct",
+          "fills": {
+            "ISSUE": "Mbr called in with a question on conversion for a business acct."
+          }
+        },
+        {
+          "value": "conversions_other",
+          "label": "Other",
+          "fills": {
+            "ISSUE": "Mbr called in with questions related to conversions."
+          }
+        }
+      ]
+    },
+    {
+      "category": "OLM",
+      "scripts": [
+        {
+          "value": "olm_muid_alert",
+          "label": "MUID Alert",
+          "fills": {
+            "ISSUE": "Mbr called in about OLB being locked due to MUID.",
+            "ACTION_TAKEN": "Reviewed and took over the call and interviewed the mbr."
+          }
+        },
+        {
+          "value": "olm_rat_alert",
+          "label": "RAT Alert",
+          "fills": {
+            "ISSUE": "Mbr called in about OLM being locked due to RAT activity.",
+            "ACTION_TAKEN": "Reviewed and took over the call and interviewed the mbr."
+          }
+        }
+      ]
+    }
   ],
   "scripts": [
     {
@@ -76,6 +253,7 @@
                   "key": "VERIFICATION",
                   "label": "Verification",
                   "type": "chips",
+                  "multiple": true,
                   "options": [
                     "CWV",
                     "RGV",
@@ -149,7 +327,7 @@
     {
       "id": "flag-no-concerns",
       "title": "Application Flagged for Identity \u2014 No Concerns",
-      "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. Advised the LO condition to contact Fraud can be satisfied. {{CLOSING}}",
+      "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. Advised the LO to proceed as normal. {{CLOSING}}",
       "fields": [
         {
           "key": "LO_NAME",
@@ -222,7 +400,7 @@
     {
       "id": "identity-review-combined",
       "title": "Identity Review \u2014 Full Walkthrough",
-      "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. {{#IF_CONCERNS=no}}Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. No identity concerns found. Advised the LO condition to contact Fraud can be satisfied.{{/IF_CONCERNS}}{{#IF_CONCERNS=yes}}Reviewed for applicant {{APPLICANT_NAME}}. Concerns with identity found. {{DISCREPANCIES}} Added condition(s): {{CONDITIONS}}. Advised LO {{LO_ADVICE}}.{{/IF_CONCERNS}} {{CLOSING}}",
+      "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. {{#IF_CONCERNS=no}}Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. No identity concerns found. Advised the LO to proceed as normal.{{/IF_CONCERNS}}{{#IF_CONCERNS=yes}}Reviewed for applicant {{APPLICANT_NAME}}. Concerns with identity found. {{DISCREPANCIES}} Added condition(s): {{CONDITIONS}}. Advised LO {{LO_ADVICE}}.{{/IF_CONCERNS}} {{CLOSING}}",
       "fields": [
         {
           "key": "LO_NAME",
@@ -282,7 +460,7 @@
     {
       "id": "core-fraud-warning",
       "title": "Application Flagged for Core Fraud Warning",
-      "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Core Fraud warning. Reviewed Keystone, purpose of the fraud warning is on acct {{ACCT_NUM}} for member {{MEMBER_NAME}} due to {{WARNING_PURPOSE}}. Advised LO Core Fraud Warning condition can be satisfied and {{LO_ADVICE}}.",
+      "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Core Fraud warning. Reviewed Keystone, purpose of the fraud warning is on acct {{ACCT_NUM}} for member {{MEMBER_NAME}} due to {{WARNING_PURPOSE}}. {{#IF_LO_ADVICE=no_concerns}}Advised LO Core Fraud Warning condition can be satisfied and fraud has no concerns.{{/IF_LO_ADVICE}}{{#IF_LO_ADVICE=cannot_recommend}}Advised LO fraud cannot recommend extending credit due to activity, but decision is up to LO manager/underwriting.{{/IF_LO_ADVICE}} {{#IF_CONDITIONS_ADDED=yes}}Added condition(s): {{CONDITIONS}}.{{/IF_CONDITIONS_ADDED}}",
       "fields": [
         {
           "key": "LO_NAME",
@@ -311,10 +489,22 @@
         {
           "key": "LO_ADVICE",
           "label": "Advice to LO",
-          "type": "chips",
-          "options": [
-            "fraud has no concerns",
-            "fraud cannot recommend extending credit due to activity, but decision is up to LO manager/underwriting"
+          "type": "branch",
+          "compact": true,
+          "branches": [
+            { "value": "no_concerns", "label": "fraud has no concerns", "fields": [] },
+            { "value": "cannot_recommend", "label": "fraud cannot recommend extending credit due to activity, but decision is up to LO manager/underwriting", "fields": [] }
+          ]
+        },
+        {
+          "key": "CONDITIONS_ADDED",
+          "label": "Conditions Added?",
+          "type": "branch",
+          "noLabel": "No",
+          "yesLabel": "Yes",
+          "noFields": [],
+          "yesFields": [
+            { "key": "CONDITIONS", "label": "Conditions Added", "type": "text", "placeholder": "e.g. Step in BR with ID" }
           ]
         }
       ]
@@ -517,7 +707,7 @@
     {
       "id": "id-scan-pass-no-concerns",
       "title": "ID Scan Passed \u2014 No Fraud Concerns",
-      "template": "Fraud Review: {{LO_NAME}} called in to {{CALL_REASON}} for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. Advised the LO condition to contact Fraud can be satisfied. {{CLOSING}}",
+      "template": "Fraud Review: {{LO_NAME}} called in to {{CALL_REASON}} for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. Advised the LO to proceed as normal. {{CLOSING}}",
       "fields": [
         {
           "key": "LO_NAME",
@@ -605,7 +795,7 @@
     {
       "id": "alloy-mismatch-combined",
       "title": "Alloy Phone/Email Mismatch \u2014 Full Walkthrough",
-      "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Alloy flagged Phone/Email mismatch. Made outbound call to number in LN ending in {{PHONE_LAST4}}. {{#IF_OUTCOME=noanswer}}No answer. Added conditions for applicant to step in BR with ID, POR and Physical (ITIN/SSC) in order to proceed with application. {{CLOSING}}{{/IF_OUTCOME}}{{#IF_OUTCOME=notfraud}}Made contact with applicant who confirmed application is valid. {{#IF_FURTHER=no}}Based on review Name, DOB, Address, TIN were a match. No further concerns. Advised the LO condition to contact Fraud can be satisfied.{{/IF_FURTHER}}{{#IF_FURTHER=yes}}Further concerns found. {{FURTHER_CONCERNS}} Added condition(s): {{FURTHER_CONDITIONS}}. Advised LO to proceed once conditions are satisfied.{{/IF_FURTHER}} {{CLOSING}}{{/IF_OUTCOME}}{{#IF_OUTCOME=fraud}}Confirmed with person that they did NOT apply for application. Advising LO we can no longer proceed with application and to deny application for unable to verify identity.{{/IF_OUTCOME}}",
+      "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Alloy flagged Phone/Email mismatch. Made outbound call to number in LN ending in {{PHONE_LAST4}}. {{#IF_OUTCOME=noanswer}}No answer. Added conditions for applicant to step in BR with ID, POR and Physical (ITIN/SSC) in order to proceed with application.{{/IF_OUTCOME}}{{#IF_OUTCOME=notfraud}}Made contact with applicant who confirmed application is valid. {{#IF_FURTHER=no}}Based on review Name, DOB, Address, TIN were a match. No further concerns. Advised the LO to proceed as normal.{{/IF_FURTHER}}{{#IF_FURTHER=yes}}Further concerns found. {{FURTHER_CONCERNS}} Added condition(s): {{FURTHER_CONDITIONS}}. Advised LO to proceed once conditions are satisfied.{{/IF_FURTHER}} {{CLOSING}}{{/IF_OUTCOME}}{{#IF_OUTCOME=fraud}}Confirmed with person that they did NOT apply for application. Advising LO we can no longer proceed with application and to deny application for unable to verify identity.{{/IF_OUTCOME}}",
       "fields": [
         {
           "key": "LO_NAME",
@@ -738,7 +928,7 @@
     {
       "id": "alloy-mismatch-confirmed-not-fraud",
       "title": "Alloy Phone/Email Mismatch \u2014 Confirmed Not Fraud",
-      "template": "Fraud Review: {{LO_NAME}} called to {{CALL_REASON}} for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Alloy flagged Phone/Email mismatch. Made outbound call to number in LN ending in {{PHONE_LAST4}} and made contact with applicant who confirmed application is valid. No further concerns. Advised the LO condition to contact Fraud can be satisfied. {{CLOSING}}",
+      "template": "Fraud Review: {{LO_NAME}} called to {{CALL_REASON}} for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Alloy flagged Phone/Email mismatch. Made outbound call to number in LN ending in {{PHONE_LAST4}} and made contact with applicant who confirmed application is valid. No further concerns. Advised the LO to proceed as normal. {{CLOSING}}",
       "fields": [
         {
           "key": "LO_NAME",
@@ -821,7 +1011,7 @@
     {
       "id": "no-condition-lo-help",
       "title": "No Condition \u2014 LO Calls In for Help",
-      "template": "Fraud Review: {{LO_NAME}} called in due to {{LO_REQUEST}}. Reviewed {{SYSTEMS_REVIEWED}}. Based on findings {{FINDINGS}}. Advised LO {{NEXT_STEPS}}. {{CLOSING}}",
+      "template": "Fraud Review: {{LO_NAME}} called in due to {{LO_REQUEST}}. Reviewed {{SYSTEMS_REVIEWED}}. Based on findings {{FINDINGS}}. Advised LO {{NEXT_STEPS}}. Advised LO {{LO_ADVICE}}. {{CLOSING}}",
       "fields": [
         {
           "key": "LO_NAME",
@@ -851,6 +1041,15 @@
           "label": "Next Steps / Advice",
           "type": "text",
           "placeholder": "e.g. proceed as normal"
+        },
+        {
+          "key": "LO_ADVICE",
+          "label": "Advice to LO",
+          "type": "chips",
+          "options": [
+            "once condition is satisfied, we can proceed",
+            "fraud cannot recommend extending credit due to activity, but decision is up to LO manager/underwriting"
+          ]
         },
         {
           "key": "CLOSING",
@@ -932,6 +1131,7 @@
           "key": "VERIFICATION",
           "label": "Verification Method",
           "type": "chips",
+          "multiple": true,
           "options": [
             "CWV",
             "RGV",
@@ -980,6 +1180,374 @@
           "key": "SIGNATURE",
           "label": "Signature",
           "type": "signature"
+        }
+      ]
+    },
+    {
+      "id": "fraud-condition-combined",
+      "title": "Fraud Condition (Identity / ID Scan / Alloy)",
+      "template": "Fraud Review: {{LO_NAME}} called in to {{#IF_REVIEW_TYPE=standard}}Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. {{#IF_ID_SCAN_FAILED=yes}}ID Scan failed due to {{FAIL_REASON}}. Applicant has attempted ID Scan {{#IF_ATTEMPT_COUNT=one}}1 time{{/IF_ATTEMPT_COUNT}}{{#IF_ATTEMPT_COUNT=two}}2 times{{/IF_ATTEMPT_COUNT}}{{#IF_ATTEMPT_COUNT=three}}3 times{{/IF_ATTEMPT_COUNT}}. {{#IF_ATTEMPT_COUNT=three}}Applicant will need to step in branch with ID to proceed. {{/IF_ATTEMPT_COUNT}}{{#IF_ATTEMPT_COUNT=one}}{{#IF_MEMBERSHIP_TYPE=new}}Advised for applicant to attempt ID scan again. If applicant continues to fail after 3 attempts they will need to step in BR with ID to proceed. {{/IF_MEMBERSHIP_TYPE}}{{#IF_MEMBERSHIP_TYPE=existing}}Applicant is an existing established member with no fraud concerns. If applicant continues to fail after 3 attempts, they will need to step in BR with ID to proceed. {{/IF_MEMBERSHIP_TYPE}}{{/IF_ATTEMPT_COUNT}}{{#IF_ATTEMPT_COUNT=two}}{{#IF_MEMBERSHIP_TYPE=new}}Advised for applicant to attempt ID scan again. If applicant continues to fail after 3 attempts they will need to step in BR with ID to proceed. {{/IF_MEMBERSHIP_TYPE}}{{#IF_MEMBERSHIP_TYPE=existing}}Applicant is an existing established member with no fraud concerns. If applicant continues to fail after 3 attempts, they will need to step in BR with ID to proceed. {{/IF_MEMBERSHIP_TYPE}}{{/IF_ATTEMPT_COUNT}}{{/IF_ID_SCAN_FAILED}}{{#IF_CONCERNS=no}}{{#IF_ID_SCAN_FAILED=no}}Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. Advised the LO condition to contact Fraud can be satisfied.{{/IF_ID_SCAN_FAILED}}{{/IF_CONCERNS}}{{#IF_CONCERNS=yes}}{{#IF_ID_SCAN_FAILED=yes}}ID Scan failed and Concerns with identity found. {{DISCREPANCIES}} requesting applicant step in branch, added conditions {{CONDITIONS}}. Advised LO {{LO_ADVICE}}.{{/IF_ID_SCAN_FAILED}}{{#IF_ID_SCAN_FAILED=no}}Based on review discrepancies found with {{DISCREPANCIES}}. Added condition(s) {{CONDITIONS}}. Advised LO {{LO_ADVICE}}.{{/IF_ID_SCAN_FAILED}}{{/IF_CONCERNS}}{{/IF_REVIEW_TYPE}}{{#IF_REVIEW_TYPE=alloy}}Satisfy Condition for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Alloy flagged Phone/Email mismatch. {{#IF_OUTCOME=noanswer}}Made outbound call to number in LN ending in {{PHONE_LAST4}}. No answer, or no number in LN to call. Added conditions for applicant to step in BR with ID, POR and Physical (ITIN/SSC) in order to proceed with application.{{/IF_OUTCOME}}{{#IF_OUTCOME=notfraud}}Made outbound call to number in LN ending in {{PHONE_LAST4}} and made contact with applicant who confirmed application is valid. {{#IF_FURTHER=no}}No further concerns. Advised the LO condition to contact Fraud can be satisfied.{{/IF_FURTHER}}{{#IF_FURTHER=yes}}Further concerns found. {{FURTHER_CONCERNS}} Added condition(s): {{FURTHER_CONDITIONS}}. Advised LO to proceed once conditions are satisfied.{{/IF_FURTHER}}{{/IF_OUTCOME}}{{#IF_OUTCOME=fraud}}Concerns with identity found. {{DISCREPANCIES}} reached out to number ending in {{PHONE_LAST4}} via LN and confirmed with person that they did NOT apply for application. Advising LO we can no longer proceed with application and to deny application for unable to verify identity.{{/IF_OUTCOME}}{{/IF_REVIEW_TYPE}} {{CLOSING}}",
+      "fields": [
+        {
+          "key": "LO_NAME",
+          "label": "LO / Agent Name & Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "APPLICANT_NAME",
+          "label": "Applicant Name",
+          "type": "text",
+          "placeholder": "e.g. Jane Doe"
+        },
+        {
+          "key": "SYSTEMS_REVIEWED",
+          "label": "Systems Reviewed",
+          "type": "systems"
+        },
+        {
+          "key": "REVIEW_TYPE",
+          "label": "What triggered the review?",
+          "type": "branch",
+          "branches": [
+            {
+              "value": "standard",
+              "label": "Standard Identity Review",
+              "fields": [
+                {
+                  "key": "ID_SCAN_FAILED",
+                  "label": "Did ID Scan Fail?",
+                  "type": "branch",
+                  "branches": [
+                    {
+                      "value": "no",
+                      "label": "No",
+                      "fields": []
+                    },
+                    {
+                      "value": "yes",
+                      "label": "Yes",
+                      "fields": [
+                        {
+                          "key": "FAIL_REASON",
+                          "label": "Fail Reason",
+                          "type": "text",
+                          "placeholder": "e.g. video was blurry, bad lighting"
+                        },
+                        {
+                          "key": "ATTEMPT_COUNT",
+                          "label": "Attempt Count",
+                          "type": "branch",
+                          "branches": [
+                            {
+                              "value": "one",
+                              "label": "1 time",
+                              "fields": []
+                            },
+                            {
+                              "value": "two",
+                              "label": "2 times",
+                              "fields": []
+                            },
+                            {
+                              "value": "three",
+                              "label": "3 times",
+                              "fields": []
+                            }
+                          ]
+                        },
+                        {
+                          "key": "MEMBERSHIP_TYPE",
+                          "label": "New or Existing Member?",
+                          "type": "branch",
+                          "branches": [
+                            {
+                              "value": "new",
+                              "label": "New Membership",
+                              "fields": []
+                            },
+                            {
+                              "value": "existing",
+                              "label": "Existing Member",
+                              "fields": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "key": "CONCERNS",
+                  "label": "Concerns with Identity Found?",
+                  "type": "branch",
+                  "branches": [
+                    {
+                      "value": "no",
+                      "label": "No Concerns",
+                      "fields": []
+                    },
+                    {
+                      "value": "yes",
+                      "label": "Concerns Found",
+                      "fields": [
+                        {
+                          "key": "DISCREPANCIES",
+                          "label": "Findings / Discrepancies",
+                          "type": "text",
+                          "placeholder": "e.g. TIN mismatch, address inconsistency"
+                        },
+                        {
+                          "key": "CONDITIONS",
+                          "label": "Conditions Added",
+                          "type": "text",
+                          "placeholder": "e.g. Step in BR with ID"
+                        },
+                        {
+                          "key": "LO_ADVICE",
+                          "label": "Advice to LO",
+                          "type": "chips",
+                          "options": [
+                            "once condition is satisfied, we can proceed",
+                            "fraud cannot recommend extending credit due to activity, but decision is up to LO manager/underwriting"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "alloy",
+              "label": "Alloy Phone/Email Mismatch",
+              "fields": [
+                {
+                  "key": "PHONE_LAST4",
+                  "label": "Phone Last 4 Digits",
+                  "type": "text",
+                  "placeholder": "e.g. 4821"
+                },
+                {
+                  "key": "OUTCOME",
+                  "label": "Call Outcome",
+                  "type": "branch",
+                  "branches": [
+                    {
+                      "value": "noanswer",
+                      "label": "No Answer",
+                      "fields": []
+                    },
+                    {
+                      "value": "notfraud",
+                      "label": "Confirmed Not Fraud",
+                      "fields": [
+                        {
+                          "key": "FURTHER",
+                          "label": "Further Concerns?",
+                          "type": "branch",
+                          "branches": [
+                            {
+                              "value": "no",
+                              "label": "No Further Concerns",
+                              "fields": []
+                            },
+                            {
+                              "value": "yes",
+                              "label": "Further Concerns Found",
+                              "fields": [
+                                {
+                                  "key": "FURTHER_CONCERNS",
+                                  "label": "Concerns Found",
+                                  "type": "text",
+                                  "placeholder": "e.g. address mismatch, TIN discrepancy"
+                                },
+                                {
+                                  "key": "FURTHER_CONDITIONS",
+                                  "label": "Conditions Added",
+                                  "type": "text",
+                                  "placeholder": "e.g. POR, Step in BR with ID"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "value": "fraud",
+                      "label": "Confirmed Fraud",
+                      "fields": [
+                        {
+                          "key": "DISCREPANCIES",
+                          "label": "Discrepancies Found",
+                          "type": "text",
+                          "placeholder": "e.g. TIN was result code 3, TIN linked to multiple identities"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "CLOSING",
+          "label": "Closing Actions",
+          "type": "closing"
+        }
+      ]
+    },
+    {
+      "id": "misrouted-combined",
+      "title": "Misrouted",
+      "template": "Fraud Review: {{LO_NAME}} called in {{#IF_REASON=chex}}due to Chex Systems denied. Advised per KC Page 1004187 that Fraud does not approve Chex Systems to reach out to their Manager for assistance.{{/IF_REASON}}{{#IF_REASON=lending}}due to looking for approval for lending application. Advised Fraud does not make lending decisions and to reach out to their Manager/Underwriting for assistance.{{/IF_REASON}}{{#IF_REASON=crwatch}}due to Credit Report Watch for applicant {{APPLICANT_NAME}}. Advised agent must reach out to number on CR and confirm with individual they are applying and once this is completed the LO can proceed and update the status of condition.{{/IF_REASON}}",
+      "fields": [
+        {
+          "key": "LO_NAME",
+          "label": "LO / Agent Name & Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "REASON",
+          "label": "Misrouted Reason",
+          "type": "branch",
+          "branches": [
+            {
+              "value": "chex",
+              "label": "Chex Systems",
+              "fields": []
+            },
+            {
+              "value": "lending",
+              "label": "Lending Approval",
+              "fields": []
+            },
+            {
+              "value": "crwatch",
+              "label": "Credit Report Watch",
+              "fields": [
+                {
+                  "key": "APPLICANT_NAME",
+                  "label": "Applicant Name",
+                  "type": "text",
+                  "placeholder": "e.g. Jane Doe"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-review",
+      "title": "Doc Review (Identity Documents)",
+      "template": "Fraud Review: {{LO_NAME}} called in to review identity documents for applicant {{APPLICANT_NAME}}. Documents reviewed: {{DOCS_REVIEWED}}. {{#IF_CONCERNS=no}}Based on review, documents appear valid and consistent with applicant identity. Advised the LO to proceed as normal.{{/IF_CONCERNS}}{{#IF_CONCERNS=yes}}{{DISCREPANCIES}} Added condition(s): {{CONDITIONS}}. Advised LO {{LO_ADVICE}}.{{/IF_CONCERNS}} {{CLOSING}}",
+      "fields": [
+        {
+          "key": "LO_NAME",
+          "label": "LO / Agent Name & Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "APPLICANT_NAME",
+          "label": "Applicant Name",
+          "type": "text",
+          "placeholder": "e.g. Jane Doe"
+        },
+        {
+          "key": "DOCS_REVIEWED",
+          "label": "Documents Reviewed",
+          "type": "text",
+          "placeholder": "e.g. ID, ITIN"
+        },
+        {
+          "key": "CONCERNS",
+          "label": "Concerns Found?",
+          "type": "branch",
+          "branches": [
+            {
+              "value": "no",
+              "label": "No Concerns",
+              "fields": []
+            },
+            {
+              "value": "yes",
+              "label": "Concerns Found",
+              "fields": [
+                {
+                  "key": "DISCREPANCIES",
+                  "label": "Findings / Discrepancies",
+                  "type": "text",
+                  "placeholder": "e.g. photo doesn't match, altered document"
+                },
+                {
+                  "key": "CONDITIONS",
+                  "label": "Conditions Added",
+                  "type": "text",
+                  "placeholder": "e.g. Step in BR with original ID"
+                },
+                {
+                  "key": "LO_ADVICE",
+                  "label": "Advice to LO",
+                  "type": "chips",
+                  "options": [
+                    "once condition is satisfied, we can proceed",
+                    "fraud cannot recommend extending credit due to activity, but decision is up to LO manager/underwriting"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "CLOSING",
+          "label": "Closing Actions",
+          "type": "closing"
+        }
+      ]
+    },
+    {
+      "id": "indirect-review",
+      "title": "Indirect Review (Cudl) \u2014 Rare",
+      "template": "Fraud Review: {{LO_NAME}} called in to review Cudl application for applicant {{APPLICANT_NAME}} for identity. Reviewed {{SYSTEMS_REVIEWED}}. {{FINDINGS}}. Advised {{LO_ADVICE}}. {{CLOSING}}",
+      "fields": [
+        {
+          "key": "LO_NAME",
+          "label": "LO / Agent Name & Dept",
+          "type": "text",
+          "placeholder": "e.g. John Smith / BR 12"
+        },
+        {
+          "key": "APPLICANT_NAME",
+          "label": "Applicant Name",
+          "type": "text",
+          "placeholder": "e.g. Jane Doe"
+        },
+        {
+          "key": "SYSTEMS_REVIEWED",
+          "label": "Systems Reviewed",
+          "type": "systems"
+        },
+        {
+          "key": "FINDINGS",
+          "label": "Findings",
+          "type": "text",
+          "placeholder": "e.g. no identity concerns"
+        },
+        {
+          "key": "LO_ADVICE",
+          "label": "Advised",
+          "type": "text",
+          "placeholder": "e.g. proceed as normal"
+        },
+        {
+          "key": "CLOSING",
+          "label": "Closing Actions",
+          "type": "closing"
         }
       ]
     }

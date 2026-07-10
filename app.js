@@ -26,26 +26,39 @@ function saveToStorage() {
 
 // ── LOAD DATA (localStorage first, then scripts.json) ──
 async function loadScripts() {
+  let fresh = null;
+  try {
+    const res = await fetch('scripts.json?_=' + Date.now());
+    if (res.ok) fresh = await res.json();
+  } catch (e) { /* fall through */ }
+
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
       if (parsed && Array.isArray(parsed.scripts)) {
+        // Backfill any top-level key present in scripts.json but missing from an older cached
+        // snapshot (e.g. a new key added after this cache was written), without touching keys
+        // the cache already has — existing customizations/edits are left exactly as they are.
+        if (fresh) {
+          Object.keys(fresh).forEach(key => {
+            if (!(key in parsed)) parsed[key] = fresh[key];
+          });
+        }
         AppState.data = parsed;
         return;
       }
     }
   } catch(e) { /* fall through */ }
 
-  try {
-    const res = await fetch('scripts.json?_=' + Date.now());
-    if (!res.ok) throw new Error('fetch failed');
-    AppState.data = await res.json();
+  if (fresh) {
+    AppState.data = fresh;
     saveToStorage();
-  } catch (e) {
-    AppState.data = { scripts: [], closingActions: [], systemsReviewed: [] };
-    showToast('Could not load scripts.json', 'error');
+    return;
   }
+
+  AppState.data = { scripts: [], closingActions: [], systemsReviewed: [], quickFillCategories: [] };
+  showToast('Could not load scripts.json', 'error');
 }
 
 // ── EXPORT JSON ──
@@ -85,34 +98,108 @@ function importJSON(callback) {
   input.click();
 }
 
+// ── NOTE MARKUP (shared by the Use-page live preview and the clipboard export below) ──
+// Lightweight markup: "• " line prefix for bullets, **text** for bold, _text_ for italic.
+const MARKUP_BOLD_RE = /\*\*(.+?)\*\*/g;
+const MARKUP_ITALIC_RE = /_(.+?)_/g;
+const MARKUP_BULLET_PREFIX = '• ';
+
+// Converts already-HTML-escaped text: **bold** -> <b>, _italic_ -> <i>.
+function markupInlineToHtml(escapedText) {
+  return escapedText
+    .replace(MARKUP_BOLD_RE, '<b>$1</b>')
+    .replace(MARKUP_ITALIC_RE, '<i>$1</i>');
+}
+
+// Strips markup down to plain inner text: **bold** -> bold, _italic_ -> italic.
+// "• " bullets are already the correct plain-text character, so they pass through untouched.
+function markupInlineToPlain(text) {
+  return text
+    .replace(MARKUP_BOLD_RE, '$1')
+    .replace(MARKUP_ITALIC_RE, '$1');
+}
+
+// Tag grammar for the format toolbar's toggle/replace logic (use.js): each type's opening-tag
+// regex (anchored to the end of the text immediately before the selection), a matcher for its
+// closing tag (immediately after the selection), and a builder for fresh open/close tag strings.
+// This only detects a tag of the SAME type immediately wrapping a selection — bold and italic are
+// free to nest around each other (e.g. **_text_**) and are never touched by each other's check.
+const MARKUP_TAG_DEFS = {
+  bold: {
+    openRegex: /\*\*$/,
+    matchClose: after => (after.startsWith('**') ? '**' : null),
+    build: () => ['**', '**'],
+    placeholder: 'bold text',
+  },
+  italic: {
+    openRegex: /_$/,
+    matchClose: after => (after.startsWith('_') ? '_' : null),
+    build: () => ['_', '_'],
+    placeholder: 'italic text',
+  },
+};
+
+// ── WHOLE-NOTE FONT/SIZE (Preview panel controls, use.js) ──
+// Shared with use.js the same way MARKUP_BULLET_PREFIX etc. are: defined once here since
+// copyToClipboard (below) and the live preview (use.js) both need the same literal values.
+// "default"/undefined keys resolve to undefined, meaning "no override" — the clipboard HTML omits
+// the property entirely rather than writing a var()-based or empty value (Oracle-safe rule).
+const NOTE_FONTS = {
+  arial: 'Arial, Helvetica, sans-serif',
+  times: "'Times New Roman', Times, serif",
+  courier: "'Courier New', Courier, monospace",
+  georgia: 'Georgia, serif',
+  verdana: 'Verdana, Geneva, sans-serif',
+};
+const NOTE_FONT_SIZES = {
+  small: '11px',
+  normal: '13px',
+  large: '16px',
+};
+
 // ── COPY TO CLIPBOARD ──
-function copyToClipboard(text) {
-  // Every line becomes its own <p>, blank lines become empty <p> for spacing
-  // Most reliable approach for Oracle/web CRMs that strip <br> tags
+// options is optional — { font, fontSize } from the Preview panel's whole-note controls. Only
+// onCopy() (use.js) passes it; the ACCT_NUM/APP_ID plain-value copy button calls this with no
+// second argument, so it's unaffected (undefined keys resolve to undefined -> no style override).
+function copyToClipboard(text, options) {
+  const fontFamily = NOTE_FONTS[options && options.font];
+  const fontSizePx = NOTE_FONT_SIZES[options && options.fontSize];
+
+  const plainText = text.split('\n').map(markupInlineToPlain).join('\n');
+
+  // Rich HTML version: every line is its own flat <p> (blank lines become empty <p> for spacing) —
+  // most reliable for Oracle/web CRMs that strip <br> tags. Bullet lines stay as literal "• " text
+  // inside a <p> rather than real <ul>/<li> markup, since list markup is likely to get stripped by
+  // the same sanitizers that strip <br>. Font/size (when set) are applied per-<p> rather than on an
+  // outer wrapper, since Oracle's paste sanitizer may not preserve styles inherited from a wrapper.
+  let pStyle = 'margin:0';
+  if (fontFamily) pStyle += `;font-family:${fontFamily}`;
+  if (fontSizePx) pStyle += `;font-size:${fontSizePx}`;
+
   const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const html = '<!DOCTYPE html><html><body>' +
     escaped.split(/\n/).map(line =>
       line.trim() === ''
-        ? '<p style="margin:0">&nbsp;</p>'
-        : '<p style="margin:0">' + line + '</p>'
+        ? `<p style="${pStyle}">&nbsp;</p>`
+        : `<p style="${pStyle}">` + markupInlineToHtml(line) + '</p>'
     ).join('') +
     '</body></html>';
 
   if (navigator.clipboard && window.ClipboardItem) {
     const item = new ClipboardItem({
-      'text/plain': new Blob([text], { type: 'text/plain' }),
+      'text/plain': new Blob([plainText], { type: 'text/plain' }),
       'text/html':  new Blob([html],  { type: 'text/html' }),
     });
     navigator.clipboard.write([item]).then(() => showToast('Copied to clipboard ✓', 'success'))
       .catch(() => {
         // Fallback to plain text if write fails
-        navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard ✓', 'success'));
+        navigator.clipboard.writeText(plainText).then(() => showToast('Copied to clipboard ✓', 'success'));
       });
   } else if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard ✓', 'success'));
+    navigator.clipboard.writeText(plainText).then(() => showToast('Copied to clipboard ✓', 'success'));
   } else {
     const ta = document.createElement('textarea');
-    ta.value = text;
+    ta.value = plainText;
     document.body.appendChild(ta);
     ta.select();
     document.execCommand('copy');
