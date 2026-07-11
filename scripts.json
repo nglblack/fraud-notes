@@ -1186,7 +1186,7 @@
     {
       "id": "fraud-condition-combined",
       "title": "Fraud Condition (Identity / ID Scan / Alloy)",
-      "template": "Fraud Review: {{LO_NAME}} called in to {{#IF_REVIEW_TYPE=standard}}Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. {{#IF_ID_SCAN_FAILED=yes}}ID Scan failed due to {{FAIL_REASON}}. Applicant has attempted ID Scan {{#IF_ATTEMPT_COUNT=one}}1 time{{/IF_ATTEMPT_COUNT}}{{#IF_ATTEMPT_COUNT=two}}2 times{{/IF_ATTEMPT_COUNT}}{{#IF_ATTEMPT_COUNT=three}}3 times{{/IF_ATTEMPT_COUNT}}. {{#IF_ATTEMPT_COUNT=three}}Applicant will need to step in branch with ID to proceed. {{/IF_ATTEMPT_COUNT}}{{#IF_ATTEMPT_COUNT=one}}{{#IF_MEMBERSHIP_TYPE=new}}Advised for applicant to attempt ID scan again. If applicant continues to fail after 3 attempts they will need to step in BR with ID to proceed. {{/IF_MEMBERSHIP_TYPE}}{{#IF_MEMBERSHIP_TYPE=existing}}Applicant is an existing established member with no fraud concerns. If applicant continues to fail after 3 attempts, they will need to step in BR with ID to proceed. {{/IF_MEMBERSHIP_TYPE}}{{/IF_ATTEMPT_COUNT}}{{#IF_ATTEMPT_COUNT=two}}{{#IF_MEMBERSHIP_TYPE=new}}Advised for applicant to attempt ID scan again. If applicant continues to fail after 3 attempts they will need to step in BR with ID to proceed. {{/IF_MEMBERSHIP_TYPE}}{{#IF_MEMBERSHIP_TYPE=existing}}Applicant is an existing established member with no fraud concerns. If applicant continues to fail after 3 attempts, they will need to step in BR with ID to proceed. {{/IF_MEMBERSHIP_TYPE}}{{/IF_ATTEMPT_COUNT}}{{/IF_ID_SCAN_FAILED}}{{#IF_CONCERNS=no}}{{#IF_ID_SCAN_FAILED=no}}Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. Advised the LO condition to contact Fraud can be satisfied.{{/IF_ID_SCAN_FAILED}}{{/IF_CONCERNS}}{{#IF_CONCERNS=yes}}{{#IF_ID_SCAN_FAILED=yes}}ID Scan failed and Concerns with identity found. {{DISCREPANCIES}} requesting applicant step in branch, added conditions {{CONDITIONS}}. Advised LO {{LO_ADVICE}}.{{/IF_ID_SCAN_FAILED}}{{#IF_ID_SCAN_FAILED=no}}Based on review discrepancies found with {{DISCREPANCIES}}. Added condition(s) {{CONDITIONS}}. Advised LO {{LO_ADVICE}}.{{/IF_ID_SCAN_FAILED}}{{/IF_CONCERNS}}{{/IF_REVIEW_TYPE}}{{#IF_REVIEW_TYPE=alloy}}Satisfy Condition for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Alloy flagged Phone/Email mismatch. {{#IF_OUTCOME=noanswer}}Made outbound call to number in LN ending in {{PHONE_LAST4}}. No answer. Added conditions for applicant to step in BR with ID, POR and Physical (ITIN/SSC) in order to proceed with application.{{/IF_OUTCOME}}{{#IF_OUTCOME=no_number}}Attempted to make outbound call to number in LN but no phone number listed. Added conditions for applicant to step in BR with ID, POR and Physical (ITIN/SSC) in order to proceed with application.{{/IF_OUTCOME}}{{#IF_OUTCOME=notfraud}}Made outbound call to number in LN ending in {{PHONE_LAST4}} and made contact with applicant who confirmed application is valid. {{#IF_FURTHER=no}}No further concerns. Advised the LO condition to contact Fraud can be satisfied.{{/IF_FURTHER}}{{#IF_FURTHER=yes}}Further concerns found. {{FURTHER_CONCERNS}} Added condition(s): {{FURTHER_CONDITIONS}}. Advised LO to proceed once conditions are satisfied.{{/IF_FURTHER}}{{/IF_OUTCOME}}{{#IF_OUTCOME=fraud}}Concerns with identity found. {{DISCREPANCIES}} reached out to number ending in {{PHONE_LAST4}} via LN and confirmed with person that they did NOT apply for application. Advising LO we can no longer proceed with application and to deny application for unable to verify identity.{{/IF_OUTCOME}}{{/IF_REVIEW_TYPE}} {{CLOSING}}",
+      "template": "Fraud Review: {{LO_NAME}} called in to {{#IF_REVIEW_TYPE=standard}}Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. {{#IF_ID_SCAN_FAILED=yes}}ID Scan failed due to {{FAIL_REASON}}. Applicant has attempted ID Scan {{#IF_ATTEMPT_COUNT=one}}1 time{{/IF_ATTEMPT_COUNT}}{{#IF_ATTEMPT_COUNT=two}}2 times{{/IF_ATTEMPT_COUNT}}{{#IF_ATTEMPT_COUNT=three}}3 times{{/IF_ATTEMPT_COUNT}}. {{#IF_ATTEMPT_COUNT=three}}Applicant will need to step in branch with ID to proceed. {{/IF_ATTEMPT_COUNT}}{{#IF_ATTEMPT_COUNT=one}}{{#IF_MEMBERSHIP_TYPE=new}}Advised for applicant to attempt ID scan again. If applicant continues to fail after 3 attempts they will need to step in BR with ID to proceed. {{/IF_MEMBERSHIP_TYPE}}{{#IF_MEMBERSHIP_TYPE=existing}}Applicant is an existing established member with no fraud concerns. If applicant continues to fail after 3 attempts, they will need to step in BR with ID to proceed. {{/IF_MEMBERSHIP_TYPE}}{{/IF_ATTEMPT_COUNT}}{{#IF_ATTEMPT_COUNT=two}}{{#IF_MEMBERSHIP_TYPE=new}}Advised for applicant to attempt ID scan again. If applicant continues to fail after 3 attempts they will need to step in BR with ID to proceed. {{/IF_MEMBERSHIP_TYPE}}{{#IF_MEMBERSHIP_TYPE=existing}}Applicant is an existing established member with no fraud concerns. If applicant continues to fail after 3 attempts, they will need to step in BR with ID to proceed. {{/IF_MEMBERSHIP_TYPE}}{{/IF_ATTEMPT_COUNT}}{{/IF_ID_SCAN_FAILED}}{{#IF_ID_SCAN_FAILED=in_branch}}ID reviewed in branch. {{/IF_ID_SCAN_FAILED}}{{#IF_CONCERNS=no}}{{#IF_ID_SCAN_FAILED=no}}Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. Advised the LO condition to contact Fraud can be satisfied.{{/IF_ID_SCAN_FAILED}}{{#IF_ID_SCAN_FAILED=in_branch}}Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. Advised the LO condition to contact Fraud can be satisfied.{{/IF_ID_SCAN_FAILED}}{{/IF_CONCERNS}}{{#IF_CONCERNS=yes}}{{#IF_ID_SCAN_FAILED=yes}}ID Scan failed and Concerns with identity found. {{DISCREPANCIES}} requesting applicant step in branch, added conditions {{CONDITIONS}}. Advised LO {{LO_ADVICE}}.{{/IF_ID_SCAN_FAILED}}{{#IF_ID_SCAN_FAILED=no}}Based on review discrepancies found with {{DISCREPANCIES}}. Added condition(s) {{CONDITIONS}}. Advised LO {{LO_ADVICE}}.{{/IF_ID_SCAN_FAILED}}{{#IF_ID_SCAN_FAILED=in_branch}}Based on review discrepancies found with {{DISCREPANCIES}}. Added condition(s) {{CONDITIONS}}. Advised LO {{LO_ADVICE}}.{{/IF_ID_SCAN_FAILED}}{{/IF_CONCERNS}}{{/IF_REVIEW_TYPE}}{{#IF_REVIEW_TYPE=alloy}}Satisfy Condition for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Alloy flagged Phone/Email mismatch. {{#IF_ALLOY_LOCATION=phone}}{{#IF_OUTCOME=noanswer}}Made outbound call to number in LN ending in {{PHONE_LAST4}}. No answer. Added conditions for applicant to step in BR with ID, POR and Physical (ITIN/SSC) in order to proceed with application.{{/IF_OUTCOME}}{{#IF_OUTCOME=no_number}}Attempted to make outbound call to number in LN but no phone number listed. Added conditions for applicant to step in BR with ID, POR and Physical (ITIN/SSC) in order to proceed with application.{{/IF_OUTCOME}}{{#IF_OUTCOME=notfraud}}Made outbound call to number in LN ending in {{PHONE_LAST4}} and made contact with applicant who confirmed application is valid. {{#IF_FURTHER=no}}No further concerns. Advised the LO condition to contact Fraud can be satisfied.{{/IF_FURTHER}}{{#IF_FURTHER=yes}}Further concerns found. {{FURTHER_CONCERNS}} Added condition(s): {{FURTHER_CONDITIONS}}. Advised LO to proceed once conditions are satisfied.{{/IF_FURTHER}}{{/IF_OUTCOME}}{{#IF_OUTCOME=fraud}}Concerns with identity found. {{DISCREPANCIES}} reached out to number ending in {{PHONE_LAST4}} via LN and confirmed with person that they did NOT apply for application. Advising LO we can no longer proceed with application and to deny application for unable to verify identity.{{/IF_OUTCOME}}{{/IF_ALLOY_LOCATION}}{{#IF_ALLOY_LOCATION=in_branch}}Member came into branch; identity already verified in person. Reviewed SSC and POR in branch to satisfy condition.{{/IF_ALLOY_LOCATION}}{{/IF_REVIEW_TYPE}} {{CLOSING}}",
       "fields": [
         {
           "key": "LO_NAME",
@@ -1222,6 +1222,11 @@
                     {
                       "value": "no",
                       "label": "No",
+                      "fields": []
+                    },
+                    {
+                      "value": "in_branch",
+                      "label": "N/A — Reviewed In Branch",
                       "fields": []
                     },
                     {
@@ -1323,55 +1328,80 @@
               "label": "Alloy Phone/Email Mismatch",
               "fields": [
                 {
-                  "key": "PHONE_LAST4",
-                  "label": "Phone Last 4 Digits",
-                  "type": "text",
-                  "placeholder": "e.g. 4821"
-                },
-                {
-                  "key": "OUTCOME",
-                  "label": "Call Outcome",
+                  "key": "ALLOY_LOCATION",
+                  "label": "Member Location",
                   "type": "branch",
                   "branches": [
                     {
-                      "value": "noanswer",
-                      "label": "No Answer",
-                      "fields": []
-                    },
-                    {
-                      "value": "no_number",
-                      "label": "No Phone Number Available",
-                      "fields": []
-                    },
-                    {
-                      "value": "notfraud",
-                      "label": "Confirmed Not Fraud",
+                      "value": "phone",
+                      "label": "Over the Phone",
                       "fields": [
                         {
-                          "key": "FURTHER",
-                          "label": "Further Concerns?",
+                          "key": "PHONE_LAST4",
+                          "label": "Phone Last 4 Digits",
+                          "type": "text",
+                          "placeholder": "e.g. 4821"
+                        },
+                        {
+                          "key": "OUTCOME",
+                          "label": "Call Outcome",
                           "type": "branch",
                           "branches": [
                             {
-                              "value": "no",
-                              "label": "No Further Concerns",
+                              "value": "noanswer",
+                              "label": "No Answer",
                               "fields": []
                             },
                             {
-                              "value": "yes",
-                              "label": "Further Concerns Found",
+                              "value": "no_number",
+                              "label": "No Phone Number Available",
+                              "fields": []
+                            },
+                            {
+                              "value": "notfraud",
+                              "label": "Confirmed Not Fraud",
                               "fields": [
                                 {
-                                  "key": "FURTHER_CONCERNS",
-                                  "label": "Concerns Found",
-                                  "type": "text",
-                                  "placeholder": "e.g. address mismatch, TIN discrepancy"
-                                },
+                                  "key": "FURTHER",
+                                  "label": "Further Concerns?",
+                                  "type": "branch",
+                                  "branches": [
+                                    {
+                                      "value": "no",
+                                      "label": "No Further Concerns",
+                                      "fields": []
+                                    },
+                                    {
+                                      "value": "yes",
+                                      "label": "Further Concerns Found",
+                                      "fields": [
+                                        {
+                                          "key": "FURTHER_CONCERNS",
+                                          "label": "Concerns Found",
+                                          "type": "text",
+                                          "placeholder": "e.g. address mismatch, TIN discrepancy"
+                                        },
+                                        {
+                                          "key": "FURTHER_CONDITIONS",
+                                          "label": "Conditions Added",
+                                          "type": "text",
+                                          "placeholder": "e.g. POR, Step in BR with ID"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "value": "fraud",
+                              "label": "Confirmed Fraud",
+                              "fields": [
                                 {
-                                  "key": "FURTHER_CONDITIONS",
-                                  "label": "Conditions Added",
+                                  "key": "DISCREPANCIES",
+                                  "label": "Discrepancies Found",
                                   "type": "text",
-                                  "placeholder": "e.g. POR, Step in BR with ID"
+                                  "placeholder": "e.g. TIN was result code 3, TIN linked to multiple identities"
                                 }
                               ]
                             }
@@ -1380,16 +1410,9 @@
                       ]
                     },
                     {
-                      "value": "fraud",
-                      "label": "Confirmed Fraud",
-                      "fields": [
-                        {
-                          "key": "DISCREPANCIES",
-                          "label": "Discrepancies Found",
-                          "type": "text",
-                          "placeholder": "e.g. TIN was result code 3, TIN linked to multiple identities"
-                        }
-                      ]
+                      "value": "in_branch",
+                      "label": "In Branch",
+                      "fields": []
                     }
                   ]
                 }
