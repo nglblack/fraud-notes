@@ -18,61 +18,46 @@
       "category": "Zelle",
       "scripts": [
         {
-          "value": "zelle_linked",
-          "label": "Linked Analysis",
+          "value": "la_fa",
+          "label": "LA FA",
           "fills": {
-            "ISSUE": "Mbr calling with issues related to Zelle. Issue: linked analysis block.",
-            "ACTION_TAKEN": "Reviewed and removed linked analysis block.",
-            "ADVICE": "Advised agent to assist mbr with removing payees."
+            "ISSUE": "Mbr calling with issues related to Zelle. Issue: linked analysis block.\n",
+            "ACTION_TAKEN": "Reviewed and removed block.",
+            "ADVICE": "Advised agent to assist mbr with removing payee."
           }
         },
         {
-          "value": "zelle_la_to_fa",
-          "label": "LA to FA",
-          "fills": {
-            "ISSUE": "Mbr called in about a payee showing as linked to fraud.",
-            "ACTION_TAKEN": "Reviewed and unblocked the payee.",
-            "ADVICE": "Advised agent to have mbr delete the payee."
-          }
-        },
-        {
-          "value": "zelle_cst_fraud_reported",
+          "value": "cst_fraud_reported",
           "label": "Cst Fraud Reported",
           "fills": {
-            "ISSUE": "Mbr called in about their profile being blocked by FIS due to fraud reported against them.",
-            "ACTION_TAKEN": "Reviewed and interviewed the mbr."
+            "ISSUE": "Mbr called in about their zelle profile being blocked.",
+            "ACTION_TAKEN": "Reviewed and appears to be blocked by FIS due to fraud reported against the Mbr. Took over call to interview the mbr."
           }
         },
         {
-          "value": "zelle_sp_alert",
+          "value": "sp_alert",
           "label": "SP Alert",
           "fills": {
-            "ISSUE": "Mbr called in about their profile showing RT-Fraud.",
-            "ACTION_TAKEN": "Reviewed and cleared the alert in SP and added mbr to WP WL."
+            "ISSUE": "Mbr called in about a zelle transaction not going through.",
+            "ACTION_TAKEN": "Reviewed and appears their transaction declined for RT-Fraud. Cleared the alert in SP and added mbr to WP WL."
           }
         },
         {
-          "value": "zelle_organizational_request",
+          "value": "organizational_request",
           "label": "Organizational Request",
           "fills": {
-            "ISSUE": "Mbr called in about their profile being blocked due to an organization request.",
-            "ACTION_TAKEN": "Reviewed and interviewed the mbr.",
+            "ISSUE": "Mbr called in about their Zelle profile being blocked. ",
+            "ACTION_TAKEN": "Reviewed and appears to be blocked due to an organization request. Took over call to interview the mbr.",
             "ADVICE": "Advised agent a determination was made to email FIS about unblocking the profile."
           }
         },
         {
-          "value": "zelle_blocked_enrollment",
+          "value": "blocked_enrollment",
           "label": "Blocked Enrollment",
           "fills": {
-            "ISSUE": "Mbr called in about (what is on block list).",
+            "ISSUE": "Mbr called in about not being able to access their Zelle. ",
+            "ACTION_TAKEN": "Reviewed and appears to be they have been put on the blocked enrollment list.",
             "ADVICE": "Advised agent I would email FIS to see about removing from the block list; no timeframe on when FIS will respond."
-          }
-        },
-        {
-          "value": "zelle_bill_pay",
-          "label": "Bill Pay",
-          "fills": {
-            "ADVICE": "Advised agent to talk to BRE."
           }
         }
       ]
@@ -81,54 +66,57 @@
       "category": "Visa",
       "scripts": [
         {
-          "value": "visa_hard_suppression",
+          "value": "hard_suppression",
           "label": "Hard Suppression",
           "fills": {
-            "ISSUE": "Mbr called in about transaction (amount, CC number) continuing to decline after RF were adjusted.",
-            "ACTION_TAKEN": "Reviewed and took over the call, double T2V'd, and asked mbr for permission to remove FM from the card so the transaction could be approved. Transaction was successful (merchant, amount, CCM).",
-            "ADVICE": "Advised agent FM was put back on the card."
+            "ISSUE": "Mbr calling in about transaction (amount, CC number) continuing to decline after RF were adjusted.",
+            "ACTION_TAKEN": "Reviewed and took over the call, double T2V'd, and asked mbr for permission to remove FM from the card so the transaction could be approved. Transaction was successful (merchant, amount, CCM)."
           }
         },
         {
-          "value": "visa_payment_support_questions",
+          "value": "payment_support_questions",
           "label": "Payment Support Questions",
           "fills": {
-            "ISSUE": "Mbr called in about needing guidance on Visa."
+            "ISSUE": "Agent calling in needing guidance on Visa."
           }
         },
         {
-          "value": "visa_falcon",
+          "value": "falcon",
           "label": "Falcon",
           "fills": {
-            "ISSUE": "Mbr called in about clearing a Falcon alert."
+            "ISSUE": "Mbr calling in about card declining for transaction",
+            "ACTION_TAKEN": "Reviewed and cleared falcon alert. ",
+            "ADVICE": "Advised to wait 3-5 mins and attempt again. "
           }
         },
         {
-          "value": "visa_rf_adjustment",
+          "value": "rf_adjustment",
           "label": "RF Adjustment",
           "fills": {
+            "ISSUE": "Mbr attempting transaction on card ending",
             "ACTION_TAKEN": "Reviewed and adjusted RF card# (enter RF).",
             "ADVICE": "Advised mbr to try again; transaction was successful."
           }
         },
         {
-          "value": "visa_vcas",
+          "value": "vcas_2",
           "label": "VCAS",
           "fills": {
-            "ISSUE": "Mbr called in about a transaction flagging in VBV.",
-            "ACTION_TAKEN": "Reviewed and took over the call, double T2V'd, marked the transaction as good, and started bypass for (transaction, amount, card number)."
+            "ISSUE": "Mbr called in about a transaction declining on card",
+            "ACTION_TAKEN": "Reviewed and appears to be flagging in VCAS. Took over the call, double T2V'd, marked the transaction as good, and started bypass for (transaction, amount, card number)."
           }
         },
         {
-          "value": "visa_merchant",
+          "value": "merchant",
           "label": "Merchant",
           "fills": {
-            "ISSUE": "Mbr called in about a transaction not getting approved, not on MACU's side.",
+            "ISSUE": "Mbr called in about a transaction not getting approved.",
+            "ACTION_TAKEN": "Reviewed and appears its not on MACU's side. ",
             "ADVICE": "Advised mbr to reach out to the merchant."
           }
         },
         {
-          "value": "visa_misdirected",
+          "value": "misdirected",
           "label": "Misdirected",
           "fills": {
             "ISSUE": "Mbr called in about a transaction that is not a fraud-related issue."
@@ -173,19 +161,19 @@
       "category": "OLM",
       "scripts": [
         {
-          "value": "olm_muid_alert",
+          "value": "muid_alert",
           "label": "MUID Alert",
           "fills": {
-            "ISSUE": "Mbr called in about OLB being locked due to MUID.",
-            "ACTION_TAKEN": "Reviewed and took over the call and interviewed the mbr."
+            "ISSUE": "Mbr called in about OLB being locked. ",
+            "ACTION_TAKEN": "Reviewed and appears due to MUID alert. Took over the call and interviewed the mbr."
           }
         },
         {
-          "value": "olm_rat_alert",
+          "value": "rat_alert",
           "label": "RAT Alert",
           "fills": {
-            "ISSUE": "Mbr called in about OLM being locked due to RAT activity.",
-            "ACTION_TAKEN": "Reviewed and took over the call and interviewed the mbr."
+            "ISSUE": "Mbr called in about OLM being locked.",
+            "ACTION_TAKEN": "Reviewed and appears due to RAT activity alert. Took over the call and interviewed the mbr."
           }
         }
       ]
@@ -194,7 +182,7 @@
   "scripts": [
     {
       "id": "universal-note",
-      "title": "\u26a1 Universal Note",
+      "title": "⚡ Universal Note",
       "template": "{{#IF_CALLER=agent}}{{AGENT_INTRO}}, Mbr {{MEMBER_NAME}} {{VERIFICATION}} {{ACCT_NUM}}{{/IF_CALLER}}{{#IF_CALLER=member}}IBC from {{IBC_PHONE}}, Mbr {{MEMBER_NAME}} {{VERIFICATION}} {{ACCT_NUM}}{{/IF_CALLER}}\n\n{{#IF_CALL_TYPE=account}}{{ISSUE}}\n{{ACTION_TAKEN}}\n{{ADVICE}}\n\n{{SIGNATURE}}{{/IF_CALL_TYPE}}{{#IF_CALL_TYPE=application}}{{APP_SCRIPT_PLACEHOLDER}}{{/IF_CALL_TYPE}}",
       "fields": [
         {
@@ -272,7 +260,7 @@
                   "branches": [
                     {
                       "value": "zelle_linked",
-                      "label": "Zelle \u2014 Linked Analysis",
+                      "label": "Zelle — Linked Analysis",
                       "fields": []
                     },
                     {
@@ -326,7 +314,7 @@
     },
     {
       "id": "flag-no-concerns",
-      "title": "Application Flagged for Identity \u2014 No Concerns",
+      "title": "Application Flagged for Identity — No Concerns",
       "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. Advised the LO to proceed as normal. {{CLOSING}}",
       "fields": [
         {
@@ -355,7 +343,7 @@
     },
     {
       "id": "flag-concerns-found",
-      "title": "Application Flagged for Identity \u2014 Concerns Found",
+      "title": "Application Flagged for Identity — Concerns Found",
       "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. Based on review discrepancies found with {{FINDINGS}}. Added condition(s) {{CONDITIONS}}. Advised LO {{LO_ADVICE}}. {{CLOSING}}",
       "fields": [
         {
@@ -399,7 +387,7 @@
     },
     {
       "id": "identity-review-combined",
-      "title": "Identity Review \u2014 Full Walkthrough",
+      "title": "Identity Review — Full Walkthrough",
       "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition. Reviewed {{SYSTEMS_REVIEWED}}. {{#IF_CONCERNS=no}}Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. No identity concerns found. Advised the LO to proceed as normal.{{/IF_CONCERNS}}{{#IF_CONCERNS=yes}}Reviewed for applicant {{APPLICANT_NAME}}. Concerns with identity found. {{DISCREPANCIES}} Added condition(s): {{CONDITIONS}}. Advised LO {{LO_ADVICE}}.{{/IF_CONCERNS}} {{CLOSING}}",
       "fields": [
         {
@@ -492,8 +480,16 @@
           "type": "branch",
           "compact": true,
           "branches": [
-            { "value": "no_concerns", "label": "fraud has no concerns", "fields": [] },
-            { "value": "cannot_recommend", "label": "fraud cannot recommend extending credit due to activity, but decision is up to LO manager/underwriting", "fields": [] }
+            {
+              "value": "no_concerns",
+              "label": "fraud has no concerns",
+              "fields": []
+            },
+            {
+              "value": "cannot_recommend",
+              "label": "fraud cannot recommend extending credit due to activity, but decision is up to LO manager/underwriting",
+              "fields": []
+            }
           ]
         },
         {
@@ -504,14 +500,19 @@
           "yesLabel": "Yes",
           "noFields": [],
           "yesFields": [
-            { "key": "CONDITIONS", "label": "Conditions Added", "type": "text", "placeholder": "e.g. Step in BR with ID" }
+            {
+              "key": "CONDITIONS",
+              "label": "Conditions Added",
+              "type": "text",
+              "placeholder": "e.g. Step in BR with ID"
+            }
           ]
         }
       ]
     },
     {
       "id": "misrouted-chex",
-      "title": "Application Misrouted \u2014 Chex Systems",
+      "title": "Application Misrouted — Chex Systems",
       "template": "Fraud Review: {{LO_NAME}} called in due to Chex Systems denied. Advised per KC Page 1004187 that Fraud does not approve Chex Systems and can review application for identity and to reach out to their Manager for assistance.",
       "fields": [
         {
@@ -524,7 +525,7 @@
     },
     {
       "id": "misrouted-lending",
-      "title": "Application Misrouted \u2014 Lending Application Approval",
+      "title": "Application Misrouted — Lending Application Approval",
       "template": "Fraud Review: {{LO_NAME}} called in due to looking for approval for lending application. Advised Fraud does not make lending decisions and to reach out to their Manager/Underwriting for assistance.",
       "fields": [
         {
@@ -537,7 +538,7 @@
     },
     {
       "id": "misrouted-cr-watch",
-      "title": "Application Misrouted \u2014 Credit Report Watch",
+      "title": "Application Misrouted — Credit Report Watch",
       "template": "Fraud Review: {{LO_NAME}} called in due to Credit Report Watch for applicant {{APPLICANT_NAME}}. Advised agent must reach out to number on CR and confirm with individual they are applying and once this is completed they can proceed and update the status of condition.",
       "fields": [
         {
@@ -556,7 +557,7 @@
     },
     {
       "id": "id-scan-fail-no-concerns-new",
-      "title": "ID Scan Failed No Concerns \u2014 New Membership",
+      "title": "ID Scan Failed No Concerns — New Membership",
       "template": "Fraud Review: {{LO_NAME}} called in due to ID Scan failing for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. No identity concerns. ID Scan failed due to {{FAIL_REASON}}. Applicant has attempted ID Scan {{ATTEMPT_COUNT}}, advised for applicant to attempt ID scan again. If applicant continues to fail after 3 attempts they will need to step in BR with ID to proceed. {{CLOSING}}",
       "fields": [
         {
@@ -606,7 +607,7 @@
     },
     {
       "id": "id-scan-fail-no-concerns-existing",
-      "title": "ID Scan Failed No Concerns \u2014 Existing Member",
+      "title": "ID Scan Failed No Concerns — Existing Member",
       "template": "Fraud Review: {{LO_NAME}} called in due to ID Scan failing for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. No identity concerns. ID Scan failed due to {{FAIL_REASON}}. Applicant has attempted ID Scan {{ATTEMPT_COUNT}}. Applicant is an existing established member with no fraud concerns, If applicant continues to fail after 3 attempts, they will need to step in BR with ID to proceed. {{CLOSING}}",
       "fields": [
         {
@@ -656,7 +657,7 @@
     },
     {
       "id": "id-scan-fail-concerns",
-      "title": "ID Scan Failed \u2014 Fraud Concerns",
+      "title": "ID Scan Failed — Fraud Concerns",
       "template": "Fraud Review: {{LO_NAME}} called in to {{CALL_REASON}} for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. ID Scan failed and Concerns with identity found. {{DISCREPANCIES}} requesting applicant step in branch, added conditions {{CONDITIONS}} in order to proceed. {{CLOSING}}",
       "fields": [
         {
@@ -706,7 +707,7 @@
     },
     {
       "id": "id-scan-pass-no-concerns",
-      "title": "ID Scan Passed \u2014 No Fraud Concerns",
+      "title": "ID Scan Passed — No Fraud Concerns",
       "template": "Fraud Review: {{LO_NAME}} called in to {{CALL_REASON}} for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Based on review Name, DOB, Address, TIN were a match for applicant {{APPLICANT_NAME}}. Advised the LO to proceed as normal. {{CLOSING}}",
       "fields": [
         {
@@ -744,7 +745,7 @@
     },
     {
       "id": "id-scan-pass-concerns",
-      "title": "ID Scan Passed \u2014 Fraud Concerns Found",
+      "title": "ID Scan Passed — Fraud Concerns Found",
       "template": "Fraud Review: {{LO_NAME}} called in to {{CALL_REASON}} for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. ID Scan passed however discrepancies found. Concerns with identity found. {{DISCREPANCIES}} requesting applicant step in branch, added conditions {{CONDITIONS}} in order to proceed. {{CLOSING}}",
       "fields": [
         {
@@ -794,7 +795,7 @@
     },
     {
       "id": "alloy-mismatch-combined",
-      "title": "Alloy Phone/Email Mismatch \u2014 Full Walkthrough",
+      "title": "Alloy Phone/Email Mismatch — Full Walkthrough",
       "template": "Fraud Review: {{LO_NAME}} called in to Satisfy Condition for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Alloy flagged Phone/Email mismatch. Made outbound call to number in LN ending in {{PHONE_LAST4}}. {{#IF_OUTCOME=noanswer}}No answer. Added conditions for applicant to step in BR with ID, POR and Physical (ITIN/SSC) in order to proceed with application.{{/IF_OUTCOME}}{{#IF_OUTCOME=notfraud}}Made contact with applicant who confirmed application is valid. {{#IF_FURTHER=no}}Based on review Name, DOB, Address, TIN were a match. No further concerns. Advised the LO to proceed as normal.{{/IF_FURTHER}}{{#IF_FURTHER=yes}}Further concerns found. {{FURTHER_CONCERNS}} Added condition(s): {{FURTHER_CONDITIONS}}. Advised LO to proceed once conditions are satisfied.{{/IF_FURTHER}} {{CLOSING}}{{/IF_OUTCOME}}{{#IF_OUTCOME=fraud}}Confirmed with person that they did NOT apply for application. Advising LO we can no longer proceed with application and to deny application for unable to verify identity.{{/IF_OUTCOME}}",
       "fields": [
         {
@@ -882,7 +883,7 @@
     },
     {
       "id": "alloy-mismatch-confirmed-fraud",
-      "title": "Alloy Phone/Email Mismatch \u2014 Confirmed Fraud",
+      "title": "Alloy Phone/Email Mismatch — Confirmed Fraud",
       "template": "Fraud Review: {{LO_NAME}} called to {{CALL_REASON}} for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Concerns with identity found. {{DISCREPANCIES}} Alloy phone/email mismatch, reached out to number ending in {{PHONE_LAST4}} via LN and confirmed with person that they did NOT apply for application. Advising LO we can no longer proceed with application and to deny application for unable to verify identity.",
       "fields": [
         {
@@ -927,7 +928,7 @@
     },
     {
       "id": "alloy-mismatch-confirmed-not-fraud",
-      "title": "Alloy Phone/Email Mismatch \u2014 Confirmed Not Fraud",
+      "title": "Alloy Phone/Email Mismatch — Confirmed Not Fraud",
       "template": "Fraud Review: {{LO_NAME}} called to {{CALL_REASON}} for applicant {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Alloy flagged Phone/Email mismatch. Made outbound call to number in LN ending in {{PHONE_LAST4}} and made contact with applicant who confirmed application is valid. No further concerns. Advised the LO to proceed as normal. {{CLOSING}}",
       "fields": [
         {
@@ -971,7 +972,7 @@
     },
     {
       "id": "alloy-mismatch-no-answer",
-      "title": "Alloy Phone/Email Mismatch \u2014 No Answer",
+      "title": "Alloy Phone/Email Mismatch — No Answer",
       "template": "Fraud Review: {{LO_NAME}} called to {{CALL_REASON}} for application {{APPLICANT_NAME}}. Reviewed {{SYSTEMS_REVIEWED}}. Alloy flagged Phone/Email mismatch. Made outbound call to number in LN ending in {{PHONE_LAST4}}. No answer. Added conditions for applicant to step in BR with ID, POR and Physical (ITIN/SSC) in order to proceed with application.",
       "fields": [
         {
@@ -1010,7 +1011,7 @@
     },
     {
       "id": "no-condition-lo-help",
-      "title": "No Condition \u2014 LO Calls In for Help",
+      "title": "No Condition — LO Calls In for Help",
       "template": "Fraud Review: {{LO_NAME}} called in due to {{LO_REQUEST}}. Reviewed {{SYSTEMS_REVIEWED}}. Based on findings {{FINDINGS}}. Advised LO {{NEXT_STEPS}}. Advised LO {{LO_ADVICE}}. {{CLOSING}}",
       "fields": [
         {
@@ -1060,7 +1061,7 @@
     },
     {
       "id": "zelle-call-in",
-      "title": "Zelle \u2014 Member Call In",
+      "title": "Zelle — Member Call In",
       "template": "{{AGENT_NAME}} with {{CALLER_SOURCE}}, Mbr {{MEMBER_NAME}} {{ACCT_NUM}} {{VERIFICATION}}\n\nMbr calling with issues related to zelle. Issue: {{ISSUE}}. Reviewed and {{ACTION_TAKEN}}. Advised {{ADVICE}}.\n\n{{SIGNATURE}}",
       "fields": [
         {
@@ -1540,7 +1541,7 @@
     },
     {
       "id": "indirect-review",
-      "title": "Indirect Review (Cudl) \u2014 Rare",
+      "title": "Indirect Review (Cudl) — Rare",
       "template": "Fraud Review: {{LO_NAME}} called in to review Cudl application for applicant {{APPLICANT_NAME}} for identity. Reviewed {{SYSTEMS_REVIEWED}}. {{FINDINGS}}. Advised {{LO_ADVICE}}. {{CLOSING}}",
       "fields": [
         {
