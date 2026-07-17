@@ -780,15 +780,16 @@ function renderSignatureField(group, key) {
   // Auto-populate fieldValues from saved so it appears in output without retyping
   if (saved && !fieldValues[key]) fieldValues[key] = saved;
 
-  const inp = document.createElement('input');
-  inp.type = 'text';
-  inp.placeholder = 'e.g. AB-2119';
+  const inp = document.createElement('textarea');
+  inp.rows = 2;
+  inp.style.resize = 'vertical';
+  inp.placeholder = 'e.g. SOrazco\nStephanie Orazco';
   inp.value = fieldValues[key] || '';
 
   const hint = document.createElement('div');
   hint.className = 'hint';
   hint.style.marginTop = '5px';
-  hint.textContent = saved ? 'Remembered — type to update.' : 'Enter once and it will be remembered for next time.';
+  hint.textContent = saved ? 'Remembered — type to update. Press Enter for a new line.' : 'Enter once and it will be remembered for next time. Press Enter for a new line.';
 
   inp.addEventListener('input', () => {
     fieldValues[key] = inp.value;
