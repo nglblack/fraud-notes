@@ -182,7 +182,7 @@ function makeFieldEditorItem(f, i, parentArray, isTop) {
   const typeRow = document.createElement('div'); typeRow.className = 'row'; typeRow.style.marginBottom = '6px';
   const typeLbl = document.createElement('span'); typeLbl.style.cssText = 'font-size:11px;color:var(--text-muted);white-space:nowrap'; typeLbl.textContent = 'Type:';
   const typeSel = document.createElement('select'); typeSel.style.flex = '1';
-  [['text','text — free-form input'],['chips','chips — pick one option'],['closing','closing — multi-select closing actions'],['systems','systems — multi-select systems reviewed'],['branch','branch — multiple options, each reveals fields']].forEach(([val, lbl]) => {
+  [['text','text — free-form input'],['chips','chips — pick one option'],['closing','closing — multi-select closing actions'],['systems','systems — multi-select systems reviewed'],['branch','branch — multiple options, each reveals fields'],['action-log','action-log — repeatable list of actions taken']].forEach(([val, lbl]) => {
     const opt = document.createElement('option'); opt.value = val; opt.textContent = lbl;
     if (f.type === val) opt.selected = true; typeSel.appendChild(opt);
   });
@@ -190,6 +190,7 @@ function makeFieldEditorItem(f, i, parentArray, isTop) {
     f.type = typeSel.value;
     if (f.type === 'chips' && !f.options) f.options = [];
     if (f.type === 'branch') normalizeBranchField(f);
+    if (f.type === 'action-log' && !f.rowTypes) f.rowTypes = [];
     renderFieldEditorList(); renderEditorPreview();
   });
   typeRow.appendChild(typeLbl); typeRow.appendChild(typeSel); info.appendChild(typeRow);
@@ -201,6 +202,7 @@ function makeFieldEditorItem(f, i, parentArray, isTop) {
 
   if (f.type === 'chips') info.appendChild(makeChipsOptionsEditor(f));
   if (f.type === 'branch') { normalizeBranchField(f); info.appendChild(makeBranchEditor(f)); }
+  if (f.type === 'action-log') info.appendChild(makeActionLogRowTypesEditor(f));
 
   wrap.appendChild(reorder); wrap.appendChild(info);
 
@@ -308,6 +310,67 @@ function makeBranchEditor(f) {
   return section;
 }
 
+// ── ACTION-LOG ROW TYPES EDITOR ──
+function makeActionLogRowTypesEditor(f) {
+  if (!f.rowTypes) f.rowTypes = [];
+  const section = document.createElement('div'); section.style.marginTop = '6px';
+
+  const header = document.createElement('div'); header.className = 'row between'; header.style.marginBottom = '8px';
+  const lbl = document.createElement('span'); lbl.style.cssText = 'font-size:11px;color:var(--text-muted);font-weight:600'; lbl.textContent = 'Row types:';
+  const addBtn = document.createElement('button'); addBtn.className = 'btn btn-ghost btn-sm'; addBtn.style.cssText = 'font-size:10px;padding:3px 10px'; addBtn.textContent = '+ Add Row Type';
+  addBtn.addEventListener('click', () => {
+    f.rowTypes.push({ value: 'row_' + Date.now(), label: 'New Row Type', detailField: 'text', detailPlaceholder: '' });
+    renderFieldEditorList(); renderEditorPreview();
+  });
+  header.appendChild(lbl); header.appendChild(addBtn); section.appendChild(header);
+
+  const hint = document.createElement('p'); hint.className = 'hint'; hint.style.marginBottom = '8px';
+  hint.textContent = 'Each row type is one option in the Actions dropdown, and controls how its detail control renders. "verification-chips" reuses the VERIFICATION chips options; "none" hides both the detail and result controls.';
+  section.appendChild(hint);
+
+  f.rowTypes.forEach((rt, ri) => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;margin-bottom:8px;background:var(--surface2)';
+
+    const row1 = document.createElement('div'); row1.className = 'row'; row1.style.cssText = 'gap:6px;margin-bottom:6px';
+    const valInp = document.createElement('input'); valInp.type = 'text'; valInp.value = rt.value; valInp.placeholder = 'value (e.g. falcon)'; valInp.style.cssText = 'font-family:var(--mono);font-size:11px;flex:1';
+    valInp.addEventListener('input', () => { rt.value = valInp.value.toLowerCase().replace(/\s+/g,'_'); valInp.value = rt.value; renderEditorPreview(); });
+    const labelInp = document.createElement('input'); labelInp.type = 'text'; labelInp.value = rt.label; labelInp.placeholder = 'Label shown in dropdown'; labelInp.style.cssText = 'font-size:12px;flex:2';
+    labelInp.addEventListener('input', () => { rt.label = labelInp.value; renderEditorPreview(); });
+    const delBtn = document.createElement('button'); delBtn.className = 'btn btn-danger btn-sm'; delBtn.innerHTML = Icons.trash; delBtn.style.padding = '4px 6px';
+    delBtn.addEventListener('click', () => { f.rowTypes.splice(ri, 1); renderFieldEditorList(); renderEditorPreview(); });
+    row1.appendChild(valInp); row1.appendChild(labelInp); row1.appendChild(delBtn);
+    wrap.appendChild(row1);
+
+    const row2 = document.createElement('div'); row2.className = 'row'; row2.style.cssText = 'gap:6px';
+    const dfLbl = document.createElement('span'); dfLbl.style.cssText = 'font-size:10px;color:var(--text-muted);white-space:nowrap'; dfLbl.textContent = 'Detail:';
+    const dfSel = document.createElement('select'); dfSel.style.cssText = 'font-size:12px;flex:1';
+    [['text','text — free-form input'],['verification-chips','verification-chips — reuse VERIFICATION chips'],['none','none — no detail, no result']].forEach(([val, optLbl]) => {
+      const opt = document.createElement('option'); opt.value = val; opt.textContent = optLbl;
+      if ((rt.detailField || 'text') === val) opt.selected = true;
+      dfSel.appendChild(opt);
+    });
+    dfSel.addEventListener('change', () => { rt.detailField = dfSel.value; renderFieldEditorList(); renderEditorPreview(); });
+    row2.appendChild(dfLbl); row2.appendChild(dfSel);
+    wrap.appendChild(row2);
+
+    if ((rt.detailField || 'text') === 'text') {
+      const phInp = document.createElement('input'); phInp.type = 'text'; phInp.value = rt.detailPlaceholder || ''; phInp.placeholder = 'Detail hint text (optional)'; phInp.style.cssText = 'margin-top:6px;font-size:12px';
+      phInp.addEventListener('input', () => rt.detailPlaceholder = phInp.value);
+      wrap.appendChild(phInp);
+    }
+
+    section.appendChild(wrap);
+  });
+
+  if (!f.rowTypes.length) {
+    const none = document.createElement('div'); none.className = 'hint'; none.style.padding = '4px 0'; none.textContent = 'No row types yet.';
+    section.appendChild(none);
+  }
+
+  return section;
+}
+
 // ── ADD TOP-LEVEL FIELD ──
 function onAddField() {
   editingFields.push({ key: 'FIELD_' + (editingFields.length + 1), label: 'New Field', type: 'text', placeholder: '' });
@@ -322,6 +385,8 @@ function renderEditorPreview() {
   if (!template.trim()) { preview.innerHTML = '<span style="color:var(--text-dim);font-style:italic">Template preview will appear here…</span>'; return; }
 
   let text = escapeHtml(template);
+  text = text.replace(/\{\{#IF_INCLUDES_SYSTEMS=([^}]+)\}\}/g, m => `<span style="background:rgba(79,142,247,0.1);color:var(--accent);border-radius:3px;font-size:10px;padding:0 3px">${escapeHtml(m)}</span>`);
+  text = text.replace(/\{\{#IF_SET_([A-Z0-9_]+)\}\}/g, m => `<span style="background:rgba(79,142,247,0.1);color:var(--accent);border-radius:3px;font-size:10px;padding:0 3px">${escapeHtml(m)}</span>`);
   text = text.replace(/\{\{#IF_([A-Z0-9_]+)=([a-z0-9_]+)\}\}/g, m => `<span style="background:rgba(79,142,247,0.1);color:var(--accent);border-radius:3px;font-size:10px;padding:0 3px">${escapeHtml(m)}</span>`);
   text = text.replace(/\{\{\/IF_([A-Z0-9_]+)\}\}/g, m => `<span style="background:rgba(79,142,247,0.1);color:var(--accent);border-radius:3px;font-size:10px;padding:0 3px">${escapeHtml(m)}</span>`);
 
@@ -341,6 +406,7 @@ function renderEditorPreview() {
     if (f.type === 'chips')   badge = ' <span style="font-size:9px;background:var(--accent-dim);color:var(--accent);border-radius:3px;padding:1px 4px">chips</span>';
     if (f.type === 'closing') badge = ' <span style="font-size:9px;background:var(--green-dim);color:var(--green);border-radius:3px;padding:1px 4px">closing</span>';
     if (f.type === 'systems') badge = ' <span style="font-size:9px;background:var(--yellow-dim);color:var(--yellow);border-radius:3px;padding:1px 4px">systems</span>';
+    if (f.type === 'action-log') badge = ' <span style="font-size:9px;background:var(--accent-dim);color:var(--accent);border-radius:3px;padding:1px 4px">actions</span>';
     text = text.split(ph).join(`<span class="blank">${label}${badge}</span>`);
   });
 

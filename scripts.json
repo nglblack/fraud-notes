@@ -121,6 +121,50 @@
           "fills": {
             "ISSUE": "Mbr called in about a transaction that is not a fraud-related issue."
           }
+        },
+        {
+          "value": "visa_card_decline_walkthrough",
+          "label": "Card Decline Walkthrough",
+          "type": "walkthrough",
+          "fields": [
+            {
+              "key": "CARD_LAST4",
+              "label": "Card Last 4 Digits",
+              "type": "text",
+              "placeholder": "e.g. 4821"
+            },
+            {
+              "key": "TRANSACTION_DETAIL",
+              "label": "Transaction Detail",
+              "type": "text",
+              "placeholder": "e.g. $245 recurring gym membership, mbr says it's their usual monthly charge"
+            },
+            {
+              "key": "PRIOR_RF",
+              "label": "RF Already Adjusted by Other Agent (if any)",
+              "type": "text",
+              "placeholder": "e.g. ONL"
+            },
+            {
+              "key": "ACTIONS",
+              "label": "Actions Taken",
+              "type": "action-log",
+              "rowTypes": [
+                { "value": "falcon", "label": "Reviewed Falcon", "detailField": "text", "detailPlaceholder": "optional detail" },
+                { "value": "vrol", "label": "Reviewed VROL", "detailField": "text", "detailPlaceholder": "optional detail" },
+                { "value": "ov_rf", "label": "Adjusted OV RF (temporary)", "detailField": "text", "detailPlaceholder": "e.g. ONL, TVL, WLD" },
+                { "value": "base_rf", "label": "Adjusted Base RF (permanent)", "detailField": "text", "detailPlaceholder": "e.g. reviewed hist, frequent txn, updated Base RF to..." },
+                { "value": "takeover", "label": "Took over call & verified", "detailField": "verification-chips", "combinesWith": ["vcas"], "combinesWithDefault": true },
+                { "value": "suppression", "label": "Suppression (turned off FM)", "detailField": "text", "detailPlaceholder": "optional detail", "combinesWith": ["vcas"], "combinesWithDefault": true },
+                { "value": "vcas", "label": "VCAS 10 Minute Bypass", "detailField": "none", "combinesWith": ["suppression"] }
+              ]
+            }
+          ],
+          "produces": {
+            "ISSUE": "Mbr calling about transaction {{TRANSACTION_DETAIL}} on card ending {{CARD_LAST4}}.{{#IF_SET_PRIOR_RF}} Agent already adjusted RF: {{PRIOR_RF}}.{{/IF_SET_PRIOR_RF}}",
+            "ACTION_TAKEN": "{{ACTIONS}}",
+            "ADVICE": ""
+          }
         }
       ]
     },

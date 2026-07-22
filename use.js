@@ -6,6 +6,24 @@ let fieldValues = {};
 // For universal note: which application sub-script is selected
 let universalAppScript = null;
 
+// For QUICK_FILL/ZELLE_FLOW: which walkthrough-type quick-fill entry (if any) currently has its
+// inline mini-form expanded, plus that mini-form's own local field values — { entry, fieldValues }.
+// Kept separate from the outer script's fieldValues so a walkthrough's field keys (ACTIONS,
+// CARD_LAST4, etc.) can never collide with a same-named key used elsewhere. null when no
+// walkthrough panel is open.
+let activeWalkthrough = null;
+
+// Walkthrough-type quick fills that have been submitted (Applied) at least once for the note
+// currently being built, keyed by the entry's `value` — { fields, fieldValues, producesTemplate }.
+// This is what makes a submitted walkthrough re-editable instead of leaving behind only plain
+// resolved text in ISSUE/ACTION_TAKEN/ADVICE: reopening (see the "Edit" affordance in
+// renderQuickFillSelect) points activeWalkthrough.fieldValues at the SAME stored object here, so
+// every previously-added action-log row (type/detail/result, in order) comes back exactly as left.
+// Distinct from `activeWalkthrough` — that's whichever panel is currently open (if any); an entry
+// can be here (submitted before) without being the one currently open, and vice versa (freshly
+// opened, not yet submitted). Reset alongside fieldValues whenever a new/blank note starts.
+let submittedWalkthroughs = {};
+
 // Application script IDs shown in the Application Script picker.
 // This is the new consolidated walkthrough: 6 top-level reasons instead of
 // the old flat list of 17. The older individual scripts (flag-no-concerns,
@@ -394,6 +412,8 @@ function onScriptChange(e) {
   currentScript = AppState.data.scripts.find(s => s.id === id) || null;
   fieldValues = {};
   universalAppScript = null;
+  activeWalkthrough = null;
+  submittedWalkthroughs = {};
   renderFields();
   updatePreview();
 }
@@ -418,7 +438,7 @@ function renderFields() {
 // Used everywhere a fields array gets walked (top level, branch children, the universal-note app
 // sub-picker) so the grouping applies uniformly regardless of which script or nesting depth the
 // triplet appears at — no per-script special-casing needed.
-function renderFieldList(container, fields, indented) {
+function renderFieldList(container, fields, indented, values = fieldValues) {
   let i = 0;
   while (i < fields.length) {
     if (fields[i].type === 'text' && UNIVERSAL_HINTS[fields[i].key]) {
@@ -427,15 +447,15 @@ function renderFieldList(container, fields, indented) {
         run.push(fields[i]);
         i++;
       }
-      container.appendChild(renderNoteFieldGroup(run, indented));
+      container.appendChild(renderNoteFieldGroup(run, indented, values));
     } else {
-      renderOneField(container, fields[i], indented);
+      renderOneField(container, fields[i], indented, values);
       i++;
     }
   }
 }
 
-function renderNoteFieldGroup(fields, indented) {
+function renderNoteFieldGroup(fields, indented, values = fieldValues) {
   const wrap = document.createElement('div');
   wrap.className = 'note-fields-group' + (indented ? ' field-group-indented' : '');
 
@@ -455,13 +475,17 @@ function renderNoteFieldGroup(fields, indented) {
   });
 
   const col = document.createElement('div');
-  fields.forEach(field => renderOneField(col, field));
+  fields.forEach(field => renderOneField(col, field, false, values));
   wrap.appendChild(col);
 
   return wrap;
 }
 
-function renderOneField(container, field, indented) {
+// `values` is the field-value store this field (and any of its nested branch/action-log children)
+// reads from and writes into — defaults to the outer script's global `fieldValues`, but a
+// walkthrough's inline mini-form (see renderWalkthroughForm) passes its own local object instead,
+// so the same render functions work for both without the two ever colliding.
+function renderOneField(container, field, indented, values = fieldValues) {
   const group = document.createElement('div');
   group.className = 'field-group' + (indented ? ' field-group-indented' : '');
   group.dataset.fieldKey = field.key;
@@ -478,9 +502,9 @@ function renderOneField(container, field, indented) {
       ta.style.overflow = 'hidden';
       ta.style.resize = 'none';
       ta.placeholder = field.placeholder || '';
-      ta.value = fieldValues[field.key] || '';
+      ta.value = values[field.key] || '';
       const autoGrow = () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; };
-      ta.addEventListener('input', () => { fieldValues[field.key] = ta.value; updatePreview(); autoGrow(); });
+      ta.addEventListener('input', () => { values[field.key] = ta.value; updatePreview(); autoGrow(); });
       ta.addEventListener('keydown', e => handleBulletEnterKey(e, ta));
       group.appendChild(ta);
       setTimeout(autoGrow, 0);
@@ -499,9 +523,9 @@ function renderOneField(container, field, indented) {
       const inp = document.createElement('input');
       inp.type = 'text';
       inp.placeholder = field.placeholder || '';
-      inp.value = fieldValues[field.key] || '';
+      inp.value = values[field.key] || '';
       inp.style.flex = '1';
-      inp.addEventListener('input', () => { fieldValues[field.key] = inp.value; updatePreview(); });
+      inp.addEventListener('input', () => { values[field.key] = inp.value; updatePreview(); });
       row.appendChild(inp);
 
       if (field.key === 'ACCT_NUM' || field.key === 'APP_ID') {
@@ -523,23 +547,23 @@ function renderOneField(container, field, indented) {
   } else if (field.type === 'chips') {
     const chips = document.createElement('div');
     chips.className = 'chips';
-    if (field.multiple && !fieldValues[field.key]) fieldValues[field.key] = [];
+    if (field.multiple && !values[field.key]) values[field.key] = [];
     (field.options || []).forEach(opt => {
       const chip = document.createElement('button');
       const isSelected = field.multiple
-        ? fieldValues[field.key].includes(opt)
-        : fieldValues[field.key] === opt;
+        ? values[field.key].includes(opt)
+        : values[field.key] === opt;
       chip.className = 'chip' + (isSelected ? ' selected' : '');
       chip.textContent = opt;
       chip.addEventListener('click', () => {
         if (field.multiple) {
-          const arr = fieldValues[field.key];
+          const arr = values[field.key];
           const idx = arr.indexOf(opt);
           if (idx >= 0) { arr.splice(idx, 1); chip.classList.remove('selected'); }
           else { arr.push(opt); chip.classList.add('selected'); }
         } else {
-          if (fieldValues[field.key] === opt) { delete fieldValues[field.key]; chip.classList.remove('selected'); }
-          else { fieldValues[field.key] = opt; chips.querySelectorAll('.chip').forEach(c => c.classList.remove('selected')); chip.classList.add('selected'); }
+          if (values[field.key] === opt) { delete values[field.key]; chip.classList.remove('selected'); }
+          else { values[field.key] = opt; chips.querySelectorAll('.chip').forEach(c => c.classList.remove('selected')); chip.classList.add('selected'); }
         }
         updatePreview();
       });
@@ -548,13 +572,15 @@ function renderOneField(container, field, indented) {
     group.appendChild(chips);
 
   } else if (field.type === 'systems') {
-    renderSystemsField(group, field.key);
+    renderSystemsField(group, field.key, values);
   } else if (field.type === 'closing') {
-    renderClosingField(group, field.key);
+    renderClosingField(group, field.key, values);
+  } else if (field.type === 'action-log') {
+    renderActionLogField(group, field, values);
   } else if (field.type === 'branch') {
-    renderBranchField(group, field);
+    renderBranchField(group, field, values);
   } else if (field.type === 'signature') {
-    renderSignatureField(group, field.key);
+    renderSignatureField(group, field.key, values);
   }
 
   container.appendChild(group);
@@ -569,26 +595,28 @@ function normalizeBranches(field) {
   ];
 }
 
-function renderBranchField(group, field) {
+function renderBranchField(group, field, values = fieldValues) {
   const branches = normalizeBranches(field);
-  const current  = fieldValues[field.key];
+  const current  = values[field.key];
 
   // QUICK_FILL (Universal Note) and ZELLE_FLOW (Zelle) use a canned-script dropdown instead of
-  // the button toggle every other branch field gets. Everything below this — which fields (if
-  // any) become visible, and the CALL_TYPE application sub-picker — is shared and unaffected by
-  // which picker UI rendered the selection, since it's all still driven by fieldValues[field.key]
-  // and the field's own scripts.json `branches`.
+  // the button toggle every other branch field gets. They always belong to the outer script (a
+  // walkthrough's own fields never declare one), so renderQuickFillSelect works directly off the
+  // module-level fieldValues rather than the threaded `values` param. Everything below this —
+  // which fields (if any) become visible, and the CALL_TYPE application sub-picker — is shared and
+  // unaffected by which picker UI rendered the selection, since it's all still driven by
+  // values[field.key] and the field's own scripts.json `branches`.
   if (field.key === 'QUICK_FILL' || field.key === 'ZELLE_FLOW') {
     renderQuickFillSelect(group, field, current);
   } else {
-    renderBranchToggle(group, field, branches, current);
+    renderBranchToggle(group, field, branches, current, values);
   }
 
   const selected = branches.find(b => b.value === current);
   if (selected && selected.fields && selected.fields.length) {
     const childWrap = document.createElement('div');
     childWrap.className = 'branch-children';
-    renderFieldList(childWrap, selected.fields, true);
+    renderFieldList(childWrap, selected.fields, true, values);
     group.appendChild(childWrap);
   }
 
@@ -598,7 +626,7 @@ function renderBranchField(group, field) {
   }
 }
 
-function renderBranchToggle(group, field, branches, current) {
+function renderBranchToggle(group, field, branches, current, values = fieldValues) {
   const toggle = document.createElement('div');
   toggle.className = field.compact ? 'branch-toggle-compact' : 'branch-toggle';
 
@@ -607,7 +635,7 @@ function renderBranchToggle(group, field, branches, current) {
     if (field.compact) {
       // Compact branch fields (e.g. LO_ADVICE) render as small pill buttons matching .chip's
       // look, instead of the large rectangular .branch-btn style — same underlying single-select
-      // branch behavior (fieldValues[field.key] = branch.value, drives any nested child fields),
+      // branch behavior (values[field.key] = branch.value, drives any nested child fields),
       // only the visual presentation differs.
       btn.className = 'chip-branch' + (current === branch.value ? ' selected' : '');
     } else {
@@ -618,7 +646,7 @@ function renderBranchToggle(group, field, branches, current) {
     }
     btn.textContent = branch.label;
     btn.addEventListener('click', () => {
-      fieldValues[field.key] = branch.value;
+      values[field.key] = branch.value;
       renderFields();
       updatePreview();
       setTimeout(() => {
@@ -632,12 +660,16 @@ function renderBranchToggle(group, field, branches, current) {
   group.appendChild(toggle);
 }
 
-// Canned-script dropdown for QUICK_FILL/ZELLE_FLOW. Selecting an entry with a non-null "fills"
-// writes those values directly into fieldValues (same mechanism as the old zelle_linked prefill);
-// selecting "Custom" (fills: null) clears ISSUE/ACTION_TAKEN/ADVICE so the agent starts fresh.
-// Which fields actually become visible afterward is decided entirely by the shared block in
-// renderBranchField above (still reading the field's own untouched scripts.json branches) — this
-// function only sets fieldValues, it never touches field visibility itself.
+// Canned-script dropdown for QUICK_FILL/ZELLE_FLOW. Each entry is either:
+//  - static (no "type", or "type": "static"): selecting it writes its "fills" directly into
+//    fieldValues (same mechanism as the old zelle_linked prefill) — unchanged behavior.
+//  - "type": "walkthrough": selecting it does NOT touch ISSUE/ACTION_TAKEN/ADVICE. Instead it opens
+//    an inline mini-form (see renderWalkthroughForm) for the walkthrough's own `fields`, and only
+//    its Apply button (applyWalkthrough) resolves `produces` and writes the result in.
+// Which fields actually become visible afterward (for non-walkthrough entries) is decided entirely
+// by the shared block in renderBranchField above (still reading the field's own untouched
+// scripts.json branches) — this function only sets fieldValues, it never touches field visibility
+// itself, except for the walkthrough mini-form it renders inline below the select.
 function renderQuickFillSelect(group, field, current) {
   const row = document.createElement('div');
   row.className = 'row';
@@ -651,7 +683,9 @@ function renderQuickFillSelect(group, field, current) {
     .forEach(cat => {
       html += `<optgroup label="${escapeHtml(cat.category)}">`;
       cat.scripts.forEach(s => {
-        html += `<option value="${s.value}">${escapeHtml(s.label)}</option>`;
+        let suffix = s.type === 'walkthrough' ? ' (walkthrough)' : '';
+        if (s.type === 'walkthrough' && submittedWalkthroughs[s.value]) suffix = ' ✓' + suffix;
+        html += `<option value="${s.value}">${escapeHtml(s.label + suffix)}</option>`;
       });
       html += '</optgroup>';
     });
@@ -660,14 +694,23 @@ function renderQuickFillSelect(group, field, current) {
 
   sel.addEventListener('change', () => {
     fieldValues[field.key] = sel.value;
-    // Always clear all three first — every selection change starts from a blank slate, not
-    // just "Custom" — so a partial-fill script (e.g. one that only sets ISSUE) never inherits
-    // stray leftover text from whichever script was previously selected.
-    delete fieldValues['ISSUE'];
-    delete fieldValues['ACTION_TAKEN'];
-    delete fieldValues['ADVICE'];
-    if (sel.value !== 'custom') {
-      const script = findQuickFillScript(sel.value);
+    const script = sel.value !== 'custom' ? findQuickFillScript(sel.value) : null;
+
+    if (script && script.type === 'walkthrough') {
+      // Don't touch ISSUE/ACTION_TAKEN/ADVICE yet — only the mini-form's Apply button does that.
+      // If this entry was already submitted once for this note, reopen with its stored
+      // fieldValues (same object reference, so continuing to edit it here keeps
+      // submittedWalkthroughs in sync automatically) instead of starting from a blank form.
+      const existing = submittedWalkthroughs[script.value];
+      activeWalkthrough = { entry: script, fieldValues: existing ? existing.fieldValues : {} };
+    } else {
+      activeWalkthrough = null;
+      // Always clear all three first — every selection change starts from a blank slate, not
+      // just "Custom" — so a partial-fill script (e.g. one that only sets ISSUE) never inherits
+      // stray leftover text from whichever script was previously selected.
+      delete fieldValues['ISSUE'];
+      delete fieldValues['ACTION_TAKEN'];
+      delete fieldValues['ADVICE'];
       if (script && script.fills) {
         Object.entries(script.fills).forEach(([key, val]) => { fieldValues[key] = val; });
       }
@@ -700,6 +743,8 @@ function renderQuickFillSelect(group, field, current) {
             if (fieldValues[key] === val) delete fieldValues[key];
           });
         }
+        if (activeWalkthrough && activeWalkthrough.entry.value === script.value) activeWalkthrough = null;
+        delete submittedWalkthroughs[script.value];
         fieldValues[field.key] = 'custom';
         renderFields();
         updatePreview();
@@ -710,6 +755,146 @@ function renderQuickFillSelect(group, field, current) {
   }
 
   group.appendChild(row);
+
+  const isWalkthroughOpen = activeWalkthrough && activeWalkthrough.entry.value === current;
+  const submission = current ? submittedWalkthroughs[current] : null;
+
+  // Already-submitted walkthrough, panel currently collapsed: show a dedicated "Edit" affordance
+  // instead of the normal apply-on-select row — reselecting an option a <select> already has
+  // selected doesn't fire "change", so without this there'd be no way to reopen it.
+  if (submission && !isWalkthroughOpen) {
+    const editRow = document.createElement('div');
+    editRow.className = 'row';
+    editRow.style.marginTop = '6px';
+    editRow.style.gap = '6px';
+
+    const badge = document.createElement('span');
+    badge.className = 'hint';
+    badge.textContent = '✓ Submitted';
+    editRow.appendChild(badge);
+
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'btn btn-ghost btn-sm';
+    editBtn.textContent = 'Edit';
+    editBtn.addEventListener('click', () => {
+      const script = findQuickFillScript(current);
+      if (!script) return;
+      activeWalkthrough = { entry: script, fieldValues: submission.fieldValues };
+      renderFields();
+      updatePreview();
+    });
+    editRow.appendChild(editBtn);
+
+    group.appendChild(editRow);
+  }
+
+  // A walkthrough entry's inline mini-form renders beneath the select+delete row instead of
+  // applying anything immediately — see renderWalkthroughForm/applyWalkthrough.
+  if (isWalkthroughOpen) {
+    group.appendChild(renderWalkthroughForm(activeWalkthrough, field));
+  }
+}
+
+// Inline mini-form for a "walkthrough"-type quick fill: renders `entry.fields` using the exact
+// same field-rendering functions as the rest of the app (renderFieldList/renderOneField/
+// renderActionLogField/etc.), but sourced from and written to this walkthrough's own local
+// fieldValues (walkthroughState.fieldValues) via the `values` param those functions accept —
+// never the outer script's fieldValues — so e.g. this walkthrough's ACTIONS/CARD_LAST4 can never
+// collide with a same-named key elsewhere. Apply resolves entry.produces against that local store
+// and writes the result into the outer ISSUE/ACTION_TAKEN/ADVICE fields; Cancel just discards it.
+function renderWalkthroughForm(walkthroughState, field) {
+  const wrap = document.createElement('div');
+  wrap.className = 'branch-children';
+  wrap.style.marginTop = '10px';
+
+  const heading = document.createElement('div');
+  heading.className = 'hint';
+  heading.style.marginBottom = '8px';
+  heading.textContent = 'Fill in the walkthrough below, then Apply to write it into Issue / Action Taken / Advised.';
+  wrap.appendChild(heading);
+
+  renderFieldList(wrap, walkthroughState.entry.fields, true, walkthroughState.fieldValues);
+
+  const btnRow = document.createElement('div');
+  btnRow.className = 'row';
+  btnRow.style.marginTop = '10px';
+  btnRow.style.gap = '8px';
+
+  const applyBtn = document.createElement('button');
+  applyBtn.type = 'button';
+  applyBtn.className = 'btn btn-primary btn-sm';
+  applyBtn.textContent = 'Apply';
+  applyBtn.addEventListener('click', () => applyWalkthrough(walkthroughState, field));
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'btn btn-ghost btn-sm';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', () => {
+    // Only reset the dropdown to Custom for a walkthrough that's never been submitted — cancelling
+    // out of re-editing an already-submitted one should just collapse the panel and leave the
+    // prior submission (both its resolved ISSUE/ACTION_TAKEN/ADVICE and the "Edit" affordance) in
+    // place, not make it look like the walkthrough was never used.
+    const alreadySubmitted = !!submittedWalkthroughs[walkthroughState.entry.value];
+    activeWalkthrough = null;
+    if (!alreadySubmitted) fieldValues[field.key] = 'custom';
+    renderFields();
+    updatePreview();
+  });
+
+  btnRow.appendChild(applyBtn);
+  btnRow.appendChild(cancelBtn);
+  wrap.appendChild(btnRow);
+
+  return wrap;
+}
+
+// Resolves `template` against `valuesObj` instead of the module-level `fieldValues`, by
+// temporarily swapping the global binding — safe here (and only here) because resolveTemplate()
+// runs fully synchronously with no callbacks left dangling after the swap-back. The interactive
+// render* functions above use an explicit `values` parameter instead, since their event handlers
+// fire later (on user input) and must keep pointing at the right store at that later time.
+function resolveWithFieldValues(template, fields, valuesObj) {
+  const saved = fieldValues;
+  fieldValues = valuesObj;
+  try {
+    return resolveTemplate(template, fields, 'plain');
+  } finally {
+    fieldValues = saved;
+  }
+}
+
+// Resolves a walkthrough's `produces` templates against its own local fieldValues and writes them
+// into the outer note's ISSUE/ACTION_TAKEN/ADVICE. ISSUE/ACTION_TAKEN are always overwritten
+// (whether this is the first submission or a later re-edit — last action wins, no merging with
+// whatever was there before, hand-typed or from a prior submission); ADVICE is only overwritten
+// when the walkthrough actually produced non-empty text, so an agent's own hand-typed advice
+// survives running a walkthrough that has nothing to say about it.
+function applyWalkthrough(walkthroughState, field) {
+  const entry = walkthroughState.entry;
+  const produces = entry.produces || {};
+  const resolvedIssue = resolveWithFieldValues(produces.ISSUE || '', entry.fields, walkthroughState.fieldValues);
+  const resolvedAction = resolveWithFieldValues(produces.ACTION_TAKEN || '', entry.fields, walkthroughState.fieldValues);
+  const resolvedAdvice = resolveWithFieldValues(produces.ADVICE || '', entry.fields, walkthroughState.fieldValues);
+
+  fieldValues['ISSUE'] = resolvedIssue;
+  fieldValues['ACTION_TAKEN'] = resolvedAction;
+  if (resolvedAdvice.trim()) fieldValues['ADVICE'] = resolvedAdvice;
+
+  // Persist the structured input itself (not just the resolved text) so this walkthrough can be
+  // reopened later via the "Edit" affordance and re-submitted, instead of only leaving behind
+  // plain text the agent can merely hand-edit from here on. Works for any walkthrough entry —
+  // keyed generically by entry.value, nothing here is specific to any one walkthrough's fields.
+  submittedWalkthroughs[entry.value] = {
+    fields: entry.fields,
+    fieldValues: walkthroughState.fieldValues,
+    producesTemplate: produces,
+  };
+
+  activeWalkthrough = null;
+  renderFields();
+  updatePreview();
 }
 
 // Removes a script by value from whichever category holds it. If that category has no scripts
@@ -775,16 +960,310 @@ function renderAppSubPicker() {
 }
 
 
-function renderSignatureField(group, key) {
+// ── ACTION LOG FIELD ──
+// Reuses the same options/multi-select behavior as the standalone VERIFICATION chips field
+// (see the zelle-call-in / universal-note scripts) for any action-log row whose detailField is
+// "verification-chips". There's no single VERIFICATION field object to point at from inside a row
+// (rows live in an arbitrary script's action-log field, not necessarily alongside a VERIFICATION
+// field), so the option list is duplicated here rather than looked up by key.
+const VERIFICATION_CHIP_OPTIONS = ['CWV', 'RGV', 'IDV', 'RHQ', 'Voice IDV'];
+
+function renderActionLogField(group, field, values = fieldValues) {
+  if (!values[field.key]) values[field.key] = [];
+  const rows = values[field.key];
+  const rowTypes = field.rowTypes || [];
+
+  const list = document.createElement('div');
+  list.style.cssText = 'display:flex;flex-direction:column;gap:8px';
+
+  if (!rows.length) {
+    const empty = document.createElement('div');
+    empty.className = 'hint';
+    empty.style.padding = '4px 0';
+    empty.textContent = 'No actions logged yet.';
+    list.appendChild(empty);
+  } else {
+    rows.forEach((row, ri) => list.appendChild(makeActionLogRow(row, ri, rows, rowTypes)));
+  }
+
+  group.appendChild(list);
+
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'btn btn-ghost btn-sm';
+  addBtn.style.marginTop = '8px';
+  addBtn.textContent = '+ Add Action';
+  addBtn.addEventListener('click', () => {
+    const firstType = rowTypes[0];
+    rows.push({
+      type: firstType ? firstType.value : '',
+      detail: firstType && firstType.detailField === 'verification-chips' ? [] : '',
+      result: null,
+      combinedWith: defaultCombinedWithForRowType(firstType, rowTypes),
+    });
+    renderFields();
+    updatePreview();
+  });
+  group.appendChild(addBtn);
+}
+
+// Returns the rowType definitions `rt` declares in its own `combinesWith` list, restricted to
+// those whose OWN detailField is "none". combinesWith is meant to be symmetric/declarative (either
+// side listing the other is enough to offer the combination), but only "none"-detail types can
+// currently be the ADDED-ON side of a combination — a combined row still renders just one shared
+// detail/result control (the primary type's), so combining with a type that needs its own detail
+// isn't supported yet. If a future combinesWith entry points at such a type, it's silently
+// excluded here (and resolveActionLogRow falls back to just the primary sentence) rather than
+// guessing at output — extending this to detailed combined types would need its own design.
+function getCombinableRowTypes(rt, rowTypes) {
+  if (!rt || !Array.isArray(rt.combinesWith) || !rt.combinesWith.length) return [];
+  return rt.combinesWith
+    .map(val => (rowTypes || []).find(o => o.value === val))
+    .filter(o => o && o.detailField === 'none');
+}
+
+// Value for a freshly-created (or freshly-type-switched) row's combinedWith, honoring
+// combinesWithDefault: true on the rowType — defaults to the first entry in that type's own
+// (filtered, "none"-detail-only) combinable list, e.g. suppression/takeover default-checking
+// "Also apply: VCAS 10 Minute Bypass". Only ever consulted at row-creation/type-change time (see
+// the "+ Add Action" and type-select handlers below) — re-rendering an existing row never calls
+// this, so an agent unchecking the box and submitting stays unchecked on reopen rather than
+// reverting to the default.
+function defaultCombinedWithForRowType(rt, rowTypes) {
+  if (!rt || !rt.combinesWithDefault) return undefined;
+  const combinable = getCombinableRowTypes(rt, rowTypes);
+  return combinable.length ? combinable[0].value : undefined;
+}
+
+function makeActionLogRow(row, ri, rows, rowTypes) {
+  const rt = rowTypes.find(r => r.value === row.type);
+
+  const card = document.createElement('div');
+  card.style.cssText = 'border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;background:var(--surface2)';
+
+  const topRow = document.createElement('div');
+  topRow.className = 'row';
+  topRow.style.cssText = 'gap:6px;margin-bottom:6px';
+
+  const typeSel = document.createElement('select');
+  typeSel.style.flex = '1';
+  rowTypes.forEach(o => {
+    const opt = document.createElement('option'); opt.value = o.value; opt.textContent = o.label;
+    if (row.type === o.value) opt.selected = true;
+    typeSel.appendChild(opt);
+  });
+  typeSel.addEventListener('change', () => {
+    row.type = typeSel.value;
+    const newRt = rowTypes.find(o => o.value === row.type);
+    row.detail = newRt && newRt.detailField === 'verification-chips' ? [] : '';
+    row.result = null;
+    // combinedWith is specific to the old type — don't carry it over. Re-derive from the new
+    // type's own combinesWithDefault instead of just clearing, so switching TO suppression/
+    // takeover starts pre-checked same as adding a fresh row of that type would.
+    row.combinedWith = defaultCombinedWithForRowType(newRt, rowTypes);
+    renderFields();
+    updatePreview();
+  });
+  topRow.appendChild(typeSel);
+
+  const delBtn = document.createElement('button');
+  delBtn.type = 'button';
+  delBtn.className = 'btn btn-danger btn-sm';
+  delBtn.innerHTML = Icons.trash;
+  delBtn.style.flexShrink = '0';
+  delBtn.addEventListener('click', () => {
+    rows.splice(ri, 1);
+    renderFields();
+    updatePreview();
+  });
+  topRow.appendChild(delBtn);
+
+  card.appendChild(topRow);
+
+  // "Also apply" — lets this row additionally emit a combined type's lead-in sentence (see
+  // getCombinableRowTypes/resolveActionLogRow) without changing row.type itself. Only offered for
+  // combinesWith entries whose OWN detailField is "none", since a combined row renders just one
+  // shared detail/result control (the primary type's) — see getCombinableRowTypes.
+  const combinable = getCombinableRowTypes(rt, rowTypes);
+  if (combinable.length === 1) {
+    const other = combinable[0];
+    const wrap = document.createElement('label');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:12px;font-weight:normal;text-transform:none;letter-spacing:normal;color:var(--text);cursor:pointer';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = row.combinedWith === other.value;
+    cb.addEventListener('change', () => {
+      row.combinedWith = cb.checked ? other.value : undefined;
+      renderFields();
+      updatePreview();
+    });
+    wrap.appendChild(cb);
+    wrap.appendChild(document.createTextNode('Also apply: ' + other.label));
+    card.appendChild(wrap);
+  } else if (combinable.length > 1) {
+    const wrap = document.createElement('div');
+    wrap.className = 'chips';
+    wrap.style.marginBottom = '6px';
+    combinable.forEach(other => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip-branch' + (row.combinedWith === other.value ? ' selected' : '');
+      btn.textContent = 'Also apply: ' + other.label;
+      btn.addEventListener('click', () => {
+        row.combinedWith = row.combinedWith === other.value ? undefined : other.value;
+        renderFields();
+        updatePreview();
+      });
+      wrap.appendChild(btn);
+    });
+    card.appendChild(wrap);
+  }
+
+  if (rt && rt.detailField !== 'none') {
+    if (rt.detailField === 'verification-chips') {
+      if (!Array.isArray(row.detail)) row.detail = [];
+      const chips = document.createElement('div');
+      chips.className = 'chips';
+      chips.style.marginBottom = '6px';
+      VERIFICATION_CHIP_OPTIONS.forEach(opt => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'chip' + (row.detail.includes(opt) ? ' selected' : '');
+        chip.textContent = opt;
+        chip.addEventListener('click', () => {
+          const idx = row.detail.indexOf(opt);
+          if (idx >= 0) row.detail.splice(idx, 1); else row.detail.push(opt);
+          renderFields();
+          updatePreview();
+        });
+        chips.appendChild(chip);
+      });
+      card.appendChild(chips);
+    } else {
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.placeholder = rt.detailPlaceholder || '';
+      inp.value = typeof row.detail === 'string' ? row.detail : '';
+      inp.style.marginBottom = '6px';
+      inp.addEventListener('input', () => { row.detail = inp.value; updatePreview(); });
+      card.appendChild(inp);
+    }
+
+    const resultRow = document.createElement('div');
+    resultRow.className = 'chips';
+    [['success', 'Successful'], ['fail', 'Not successful']].forEach(([val, lbl]) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip-branch' + (row.result === val ? ' selected' : '');
+      btn.textContent = lbl;
+      btn.addEventListener('click', () => {
+        row.result = row.result === val ? null : val;
+        renderFields();
+        updatePreview();
+      });
+      resultRow.appendChild(btn);
+    });
+    card.appendChild(resultRow);
+  }
+
+  return card;
+}
+
+// Joins each row's resolved sentence(s) in add-order into the ACTIONS placeholder text. Row
+// behavior is keyed off the fixed rowType values (falcon/vrol/ov_rf/base_rf/takeover/suppression/
+// vcas) used by the Card Decline Walkthrough quick-fill entry — same convention as
+// resolveCallerSource hardcoding specific branch values below.
+function resolveActionLogField(rows, rowTypes) {
+  return (rows || [])
+    .map(row => {
+      const rt = rowTypes.find(r => r.value === row.type);
+      return rt ? resolveActionLogRow(row, rt, rowTypes) : '';
+    })
+    .filter(s => s && s.trim())
+    .join(' ');
+}
+
+// Resolves a single row's complete sentence(s). This is the ONLY place that builds a row's final
+// wording — there is no other function anywhere that independently appends "Turned FM back on" or
+// a VCAS mention. (A previous version split this across a per-type sentence helper plus a
+// separate combined-template lookup that reused the "suppression" case's ending from inside the
+// "takeover" case; keeping construction spread across two cooperating call sites like that is what
+// let the FM-back-on/VCAS clauses fire twice for one row. Every rowType's full wording, combined or
+// not, is written out directly in the switch below instead.)
+function resolveActionLogRow(row, rt, rowTypes) {
+  const detail = typeof row.detail === 'string' ? row.detail.trim() : '';
+  const resultSentence = row.result === 'success' ? 'Transaction was successful.'
+    : row.result === 'fail' ? 'Transaction was not successful.'
+    : '';
+
+  // combinedWith only ever points at a detailField:"none" type (enforced by the UI's
+  // getCombinableRowTypes, which only ever OFFERS combining with those); the only bespoke combined
+  // wording implemented so far is pairing with "vcas" specifically, for takeover/suppression below.
+  const combinedRt = row.combinedWith ? (rowTypes || []).find(o => o.value === row.combinedWith) : null;
+  const combinedWithVcas = !!(combinedRt && combinedRt.detailField === 'none' && row.combinedWith === 'vcas');
+
+  switch (row.type) {
+    case 'falcon':
+      return 'Reviewed Falcon' + (detail ? ` — ${detail}` : '') + '.';
+
+    case 'vrol':
+      return 'Reviewed VROL' + (detail ? ` — ${detail}` : '') + '.';
+
+    case 'ov_rf':
+      return `Reviewed available RFs and updated OV RF ${detail}. Advised member to attempt transaction again.` + (resultSentence ? ` ${resultSentence}` : '');
+
+    case 'base_rf':
+      return `Reviewed history and updated Base RF. ${detail}.` + (resultSentence ? ` ${resultSentence}` : '');
+
+    case 'takeover': {
+      const chips = Array.isArray(row.detail) ? row.detail.join('/') : '';
+      if (!combinedWithVcas) {
+        // Standalone takeover: no FM-back-on of its own — that's normally logged as a separate
+        // suppression row afterward.
+        return `Took over call and further verified member via ${chips}. Received permission to turn off Fraud monitoring and advised member to attempt transaction again.` + (resultSentence ? ` ${resultSentence}` : '');
+      }
+      // Combined with VCAS: this one row covers the whole turn-off / bypass / attempt /
+      // turn-back-on lifecycle, so it also carries the FM-back-on (and merchant referral on fail)
+      // that would otherwise live on a separate suppression row. Order: chips clause, FM-off
+      // clause (VCAS folded in), attempt clause, result, FM-back-on (always after the result,
+      // never before), merchant referral last of all on fail.
+      let sentence = `Took over call and further verified member via ${chips}. Received permission to turn off Fraud monitoring, and reviewed VCAS, adding a 10 Minute Bypass. Advised member to attempt transaction again.`;
+      if (resultSentence) sentence += ` ${resultSentence}`;
+      sentence += ' Turned FM back on.';
+      if (row.result === 'fail') sentence += ' Advised to reach out to merchant.';
+      return sentence;
+    }
+
+    case 'suppression': {
+      // Result always comes first, "Turned FM back on" always after it — cleanup happens once the
+      // outcome is known, never before — with the VCAS clause folded into that same FM-back-on
+      // clause when combined, and the merchant referral last of all on fail.
+      let sentence = resultSentence ? `${resultSentence} ` : '';
+      sentence += combinedWithVcas ? 'Turned FM back on, and reviewed VCAS, adding a 10 Minute Bypass.' : 'Turned FM back on.';
+      if (row.result === 'fail') sentence += ' Advised to reach out to merchant.';
+      return sentence;
+    }
+
+    case 'vcas':
+      // Standalone VCAS row (no combinedWith) — its own independent sentence, unaffected by any of
+      // the above.
+      return 'Reviewed VCAS and added 10 Minute Bypass.';
+
+    default:
+      return '';
+  }
+}
+
+function renderSignatureField(group, key, values = fieldValues) {
   const saved = localStorage.getItem('fraudnotes_signature') || '';
-  // Auto-populate fieldValues from saved so it appears in output without retyping
-  if (saved && !fieldValues[key]) fieldValues[key] = saved;
+  // Auto-populate from saved so it appears in output without retyping
+  if (saved && !values[key]) values[key] = saved;
 
   const inp = document.createElement('textarea');
   inp.rows = 2;
   inp.style.resize = 'vertical';
   inp.placeholder = 'e.g. SOrazco\nStephanie Orazco';
-  inp.value = fieldValues[key] || '';
+  inp.value = values[key] || '';
 
   const hint = document.createElement('div');
   hint.className = 'hint';
@@ -792,7 +1271,7 @@ function renderSignatureField(group, key) {
   hint.textContent = saved ? 'Remembered — type to update. Press Enter for a new line.' : 'Enter once and it will be remembered for next time. Press Enter for a new line.';
 
   inp.addEventListener('input', () => {
-    fieldValues[key] = inp.value;
+    values[key] = inp.value;
     localStorage.setItem('fraudnotes_signature', inp.value);
     updatePreview();
   });
@@ -802,16 +1281,16 @@ function renderSignatureField(group, key) {
 }
 
 // ── CLOSING / SYSTEMS FIELDS ──
-function renderClosingField(group, key) {
-  if (!fieldValues[key]) fieldValues[key] = [];
+function renderClosingField(group, key, values = fieldValues) {
+  if (!values[key]) values[key] = [];
   const chips = document.createElement('div');
   chips.className = 'chips';
   (AppState.data.closingActions || []).forEach(opt => {
     const chip = document.createElement('button');
-    chip.className = 'chip closing' + (fieldValues[key].includes(opt) ? ' selected' : '');
+    chip.className = 'chip closing' + (values[key].includes(opt) ? ' selected' : '');
     chip.textContent = opt;
     chip.addEventListener('click', () => {
-      const arr = fieldValues[key];
+      const arr = values[key];
       const idx = arr.indexOf(opt);
       if (idx >= 0) { arr.splice(idx, 1); chip.classList.remove('selected'); }
       else { arr.push(opt); chip.classList.add('selected'); }
@@ -822,16 +1301,16 @@ function renderClosingField(group, key) {
   group.appendChild(chips);
 }
 
-function renderSystemsField(group, key) {
-  if (!fieldValues[key]) fieldValues[key] = [];
+function renderSystemsField(group, key, values = fieldValues) {
+  if (!values[key]) values[key] = [];
   const chips = document.createElement('div');
   chips.className = 'chips';
   (AppState.data.systemsReviewed || []).forEach(opt => {
     const chip = document.createElement('button');
-    chip.className = 'chip' + (fieldValues[key].includes(opt) ? ' selected' : '');
+    chip.className = 'chip' + (values[key].includes(opt) ? ' selected' : '');
     chip.textContent = opt;
     chip.addEventListener('click', () => {
-      const arr = fieldValues[key];
+      const arr = values[key];
       const idx = arr.indexOf(opt);
       if (idx >= 0) { arr.splice(idx, 1); chip.classList.remove('selected'); }
       else { arr.push(opt); chip.classList.add('selected'); }
@@ -911,7 +1390,10 @@ function renderTextFieldPreview(displayVal) {
 function resolveTemplate(template, fields, mode) {
   let text = template;
 
-  // Handle {{#IF_INCLUDES_SYSTEMS=Some System}}...{{/IF_INCLUDES_SYSTEMS}}
+  // Handle {{#IF_INCLUDES_SYSTEMS=Some System}}...{{/IF_INCLUDES_SYSTEMS}},
+  // {{#IF_SET_KEY}}...{{/IF_SET_KEY}} (true when fieldValues[KEY] is non-empty), and
+  // {{#IF_KEY=value}}...{{/IF_KEY}}. All three run every pass until the text stops changing, so
+  // nested IF blocks of different kinds resolve correctly regardless of nesting depth or order.
   let prev;
   do {
     prev = text;
@@ -919,11 +1401,11 @@ function resolveTemplate(template, fields, mode) {
       const selected = fieldValues['SYSTEMS_REVIEWED'] || [];
       return selected.includes(systemName.trim()) ? inner : '';
     });
-  } while (text !== prev);
-
-  // Handle {{#IF_KEY=value}}...{{/IF_KEY}}
-  do {
-    prev = text;
+    text = text.replace(/\{\{#IF_SET_([A-Z0-9_]+)\}\}([\s\S]*?)\{\{\/IF_SET_\1\}\}/g, (match, key, inner) => {
+      const val = fieldValues[key];
+      const isSet = Array.isArray(val) ? val.length > 0 : !!(val && String(val).trim());
+      return isSet ? inner : '';
+    });
     text = text.replace(/\{\{#IF_([A-Z0-9_]+)=([a-z0-9_]+)\}\}([\s\S]*?)\{\{\/IF_\1\}\}/g, (match, key, val, inner) => {
       return fieldValues[key] === val ? inner : '';
     });
@@ -955,6 +1437,9 @@ function resolveTemplate(template, fields, mode) {
     } else if (field.type === 'systems') {
       const arr = fieldValues[field.key] || [];
       val = arr.join(', ');
+      displayVal = val || null;
+    } else if (field.type === 'action-log') {
+      val = resolveActionLogField(fieldValues[field.key] || [], field.rowTypes || []);
       displayVal = val || null;
     } else if (field.type === 'branch') {
       val = ''; displayVal = null;
@@ -1085,6 +1570,8 @@ function onCopy() {
 function onClear() {
   fieldValues = {};
   universalAppScript = null;
+  activeWalkthrough = null;
+  submittedWalkthroughs = {};
   renderFields();
   updatePreview();
 }
