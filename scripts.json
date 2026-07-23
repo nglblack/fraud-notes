@@ -151,10 +151,10 @@
               "type": "action-log",
               "rowTypes": [
                 { "value": "falcon", "label": "Reviewed Falcon", "detailField": "text", "detailPlaceholder": "optional detail" },
-                { "value": "vrol", "label": "Reviewed VROL", "detailField": "text", "detailPlaceholder": "optional detail" },
+                { "value": "vrol", "label": "Reviewed VROL", "detailField": "none" },
                 { "value": "ov_rf", "label": "Adjusted OV RF (temporary)", "detailField": "text", "detailPlaceholder": "e.g. ONL, TVL, WLD" },
                 { "value": "base_rf", "label": "Adjusted Base RF (permanent)", "detailField": "text", "detailPlaceholder": "e.g. reviewed hist, frequent txn, updated Base RF to..." },
-                { "value": "takeover", "label": "Took over call & verified", "detailField": "verification-chips", "combinesWith": ["vcas"], "combinesWithDefault": true },
+                { "value": "takeover", "label": "Took over call & verified", "detailField": "verification-chips", "hasResult": false },
                 { "value": "suppression", "label": "Suppression (turned off FM)", "detailField": "text", "detailPlaceholder": "optional detail", "combinesWith": ["vcas"], "combinesWithDefault": true },
                 { "value": "vcas", "label": "VCAS 10 Minute Bypass", "detailField": "none", "combinesWith": ["suppression"] }
               ]

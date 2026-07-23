@@ -225,6 +225,22 @@ textarea {
   color: var(--accent);
 }
 
+/* Disabled chip (e.g. a takeover row's verification-chips option already used by the outer
+   VERIFICATION field) — same opacity/cursor treatment as .field-reorder .btn:disabled. Stays
+   visible (not hidden) so an already-selected-but-now-disabled chip still shows what was actually
+   saved; :hover's border/color change is suppressed so it doesn't look interactive. */
+.chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.chip:disabled:hover {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+.chip.selected:disabled {
+  color: var(--accent);
+}
+
 .chip.closing { font-size: 11px; }
 .chip.closing.selected {
   background: var(--green-dim);

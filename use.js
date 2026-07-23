@@ -565,6 +565,11 @@ function renderOneField(container, field, indented, values = fieldValues) {
           if (values[field.key] === opt) { delete values[field.key]; chip.classList.remove('selected'); }
           else { values[field.key] = opt; chips.querySelectorAll('.chip').forEach(c => c.classList.remove('selected')); chip.classList.add('selected'); }
         }
+        // VERIFICATION's options are reused by "takeover" action-log rows (see makeActionLogRow),
+        // which disable whichever value(s) are already selected up here — a full re-render is
+        // needed (not just updatePreview()) so any such row re-evaluates its disabled chips
+        // against the freshly-changed value, instead of staying stuck with stale disabled state.
+        if (field.key === 'VERIFICATION') renderFields();
         updatePreview();
       });
       chips.appendChild(chip);
@@ -1035,6 +1040,12 @@ function defaultCombinedWithForRowType(rt, rowTypes) {
   return combinable.length ? combinable[0].value : undefined;
 }
 
+// NOTE on "vrol": it renders here like any other row (type select, detailField:"none" so no
+// detail/result controls — same treatment as vcas) but it is NOT an independent action. It's a
+// lookup step that only makes sense immediately before an ov_rf/base_rf row, and its only effect
+// is changing THAT row's lead-in phrase (see resolveActionLogField/resolveActionLogRow's
+// precededByVrol handling). Don't give it its own detail/result input later without also updating
+// that merge logic — it has no info or outcome of its own to carry.
 function makeActionLogRow(row, ri, rows, rowTypes) {
   const rt = rowTypes.find(r => r.value === row.type);
 
@@ -1125,17 +1136,35 @@ function makeActionLogRow(row, ri, rows, rowTypes) {
       const chips = document.createElement('div');
       chips.className = 'chips';
       chips.style.marginBottom = '6px';
+      // The same method can't verify the member twice for one call — gray out (and make
+      // non-clickable) whichever option(s) the outer VERIFICATION field already used. Always read
+      // the true global fieldValues here, never the threaded `values` param: VERIFICATION lives on
+      // the outer universal-note itself, which is a different store than a walkthrough's own local
+      // fieldValues when this row is rendered inside one (see renderWalkthroughForm) — reading it
+      // fresh on every render (rather than caching it on the row) is what makes this reactive to
+      // the outer field changing later (see its click handler below, which re-renders everything).
+      const outerVerification = fieldValues['VERIFICATION'];
+      const usedElsewhere = Array.isArray(outerVerification) ? outerVerification : (outerVerification ? [outerVerification] : []);
       VERIFICATION_CHIP_OPTIONS.forEach(opt => {
         const chip = document.createElement('button');
         chip.type = 'button';
-        chip.className = 'chip' + (row.detail.includes(opt) ? ' selected' : '');
+        const isSelected = row.detail.includes(opt);
+        const isDisabled = usedElsewhere.includes(opt);
+        chip.className = 'chip' + (isSelected ? ' selected' : '');
         chip.textContent = opt;
-        chip.addEventListener('click', () => {
-          const idx = row.detail.indexOf(opt);
-          if (idx >= 0) row.detail.splice(idx, 1); else row.detail.push(opt);
-          renderFields();
-          updatePreview();
-        });
+        // A chip already selected/saved before it became disabled stays visibly selected (never
+        // silently cleared) — it's just locked: no click listener at all, so it can neither be
+        // toggled off (and then be unable to re-add, since it'd be disabled) nor re-selected.
+        if (isDisabled) {
+          chip.disabled = true;
+        } else {
+          chip.addEventListener('click', () => {
+            const idx = row.detail.indexOf(opt);
+            if (idx >= 0) row.detail.splice(idx, 1); else row.detail.push(opt);
+            renderFields();
+            updatePreview();
+          });
+        }
         chips.appendChild(chip);
       });
       card.appendChild(chips);
@@ -1148,7 +1177,14 @@ function makeActionLogRow(row, ri, rows, rowTypes) {
       inp.addEventListener('input', () => { row.detail = inp.value; updatePreview(); });
       card.appendChild(inp);
     }
+  }
 
+  // Result control is independent of the detail control: hidden when detailField is "none" (no
+  // detail, no result — e.g. vcas) OR when the rowType explicitly opts out via hasResult: false
+  // (e.g. takeover, which has its own detail but no outcome of its own — the actual attempt result
+  // belongs to whichever row follows it, typically suppression). Every other row type (default /
+  // omitted hasResult) still shows and requires its result picker exactly as before.
+  if (rt && rt.detailField !== 'none' && rt.hasResult !== false) {
     const resultRow = document.createElement('div');
     resultRow.className = 'chips';
     [['success', 'Successful'], ['fail', 'Not successful']].forEach(([val, lbl]) => {
@@ -1173,14 +1209,39 @@ function makeActionLogRow(row, ri, rows, rowTypes) {
 // behavior is keyed off the fixed rowType values (falcon/vrol/ov_rf/base_rf/takeover/suppression/
 // vcas) used by the Card Decline Walkthrough quick-fill entry — same convention as
 // resolveCallerSource hardcoding specific branch values below.
+//
+// "vrol" is not an independent action — it's a lookup step that only ever precedes an RF
+// adjustment (ov_rf/base_rf) and changes how THAT row's lead-in phrase reads (see
+// resolveActionLogRow's precededByVrol param), so it needs adjacency awareness across rows that a
+// simple per-row .map() can't give it. This walks the list with an explicit index instead:
+//  - a "vrol" row immediately followed by "ov_rf"/"base_rf" emits nothing of its own — its effect
+//    is folded into that next row's lead-in.
+//  - a "vrol" row NOT immediately followed by one of those (out of order, last row, followed by
+//    something else) falls back to its own minimal sentence, so it's never silently dropped.
+//  - every other row resolves exactly as before, via resolveActionLogRow.
 function resolveActionLogField(rows, rowTypes) {
-  return (rows || [])
-    .map(row => {
-      const rt = rowTypes.find(r => r.value === row.type);
-      return rt ? resolveActionLogRow(row, rt, rowTypes) : '';
-    })
-    .filter(s => s && s.trim())
-    .join(' ');
+  const list = rows || [];
+  const sentences = [];
+
+  for (let i = 0; i < list.length; i++) {
+    const row = list[i];
+    const rt = rowTypes.find(r => r.value === row.type);
+    if (!rt) continue;
+
+    if (row.type === 'vrol') {
+      const next = list[i + 1];
+      const mergesIntoNext = !!next && (next.type === 'ov_rf' || next.type === 'base_rf');
+      if (mergesIntoNext) continue; // folded into the next row's lead-in instead — see below
+      sentences.push('Reviewed VROL for available rule.'); // orphaned — don't drop it silently
+      continue;
+    }
+
+    const precededByVrol = i > 0 && list[i - 1].type === 'vrol';
+    const sentence = resolveActionLogRow(row, rt, rowTypes, precededByVrol);
+    if (sentence && sentence.trim()) sentences.push(sentence);
+  }
+
+  return sentences.join(' ');
 }
 
 // Resolves a single row's complete sentence(s). This is the ONLY place that builds a row's final
@@ -1190,7 +1251,7 @@ function resolveActionLogField(rows, rowTypes) {
 // "takeover" case; keeping construction spread across two cooperating call sites like that is what
 // let the FM-back-on/VCAS clauses fire twice for one row. Every rowType's full wording, combined or
 // not, is written out directly in the switch below instead.)
-function resolveActionLogRow(row, rt, rowTypes) {
+function resolveActionLogRow(row, rt, rowTypes, precededByVrol) {
   const detail = typeof row.detail === 'string' ? row.detail.trim() : '';
   const resultSentence = row.result === 'success' ? 'Transaction was successful.'
     : row.result === 'fail' ? 'Transaction was not successful.'
@@ -1207,39 +1268,51 @@ function resolveActionLogRow(row, rt, rowTypes) {
       return 'Reviewed Falcon' + (detail ? ` — ${detail}` : '') + '.';
 
     case 'vrol':
-      return 'Reviewed VROL' + (detail ? ` — ${detail}` : '') + '.';
+      // Unreachable in practice — resolveActionLogField always handles "vrol" rows directly
+      // (folding into the following ov_rf/base_rf row's lead-in, or emitting the orphaned-row
+      // fallback below) before ever calling this function for one. Kept only as a defensive
+      // fallback matching that same text, in case something calls this directly for a vrol row.
+      return 'Reviewed VROL for available rule.';
 
-    case 'ov_rf':
-      return `Reviewed available RFs and updated OV RF ${detail}. Advised member to attempt transaction again.` + (resultSentence ? ` ${resultSentence}` : '');
+    case 'ov_rf': {
+      const leadIn = precededByVrol
+        ? `Reviewed VROL for available rule. Updated OV RF ${detail}.`
+        : `Reviewed available RFs and updated OV RF ${detail}.`;
+      return `${leadIn} Advised member to attempt transaction again.` + (resultSentence ? ` ${resultSentence}` : '');
+    }
 
-    case 'base_rf':
-      return `Reviewed history and updated Base RF. ${detail}.` + (resultSentence ? ` ${resultSentence}` : '');
+    case 'base_rf': {
+      const leadIn = precededByVrol
+        ? `Reviewed VROL for available rule. Updated Base RF ${detail}.`
+        : `Reviewed history and updated Base RF ${detail}.`;
+      return leadIn + (resultSentence ? ` ${resultSentence}` : '');
+    }
 
     case 'takeover': {
+      // No combine option and no result of its own (hasResult: false — see makeActionLogRow) —
+      // takeover only verifies the member; turning FM off/on and the attempt's outcome belong to
+      // whichever row follows it, typically suppression. resultSentence is deliberately unused
+      // here (there's nothing to attach it to on this row).
       const chips = Array.isArray(row.detail) ? row.detail.join('/') : '';
-      if (!combinedWithVcas) {
-        // Standalone takeover: no FM-back-on of its own — that's normally logged as a separate
-        // suppression row afterward.
-        return `Took over call and further verified member via ${chips}. Received permission to turn off Fraud monitoring and advised member to attempt transaction again.` + (resultSentence ? ` ${resultSentence}` : '');
-      }
-      // Combined with VCAS: this one row covers the whole turn-off / bypass / attempt /
-      // turn-back-on lifecycle, so it also carries the FM-back-on (and merchant referral on fail)
-      // that would otherwise live on a separate suppression row. Order: chips clause, FM-off
-      // clause (VCAS folded in), attempt clause, result, FM-back-on (always after the result,
-      // never before), merchant referral last of all on fail.
-      let sentence = `Took over call and further verified member via ${chips}. Received permission to turn off Fraud monitoring, and reviewed VCAS, adding a 10 Minute Bypass. Advised member to attempt transaction again.`;
-      if (resultSentence) sentence += ` ${resultSentence}`;
-      sentence += ' Turned FM back on.';
-      if (row.result === 'fail') sentence += ' Advised to reach out to merchant.';
-      return sentence;
+      return `Took over call and further verified member via ${chips}.`;
     }
 
     case 'suppression': {
-      // Result always comes first, "Turned FM back on" always after it — cleanup happens once the
-      // outcome is known, never before — with the VCAS clause folded into that same FM-back-on
-      // clause when combined, and the merchant referral last of all on fail.
-      let sentence = resultSentence ? `${resultSentence} ` : '';
-      sentence += combinedWithVcas ? 'Turned FM back on, and reviewed VCAS, adding a 10 Minute Bypass.' : 'Turned FM back on.';
+      if (!combinedWithVcas) {
+        // Plain suppression: result always comes first, "Turned FM back on" always after it —
+        // cleanup happens once the outcome is known, never before — merchant referral last on fail.
+        let sentence = resultSentence ? `${resultSentence} ` : '';
+        sentence += 'Turned FM back on.';
+        if (row.result === 'fail') sentence += ' Advised to reach out to merchant.';
+        return sentence;
+      }
+      // Combined with VCAS: this row now covers the whole turn-off / bypass / attempt /
+      // turn-back-on lifecycle in one go (takeover no longer combines — see the 'takeover' case
+      // above). Order: FM-off clause (VCAS folded in), attempt clause, result, FM-back-on (always
+      // after the result, never before), merchant referral last of all on fail.
+      let sentence = 'Received permission to turn off Fraud monitoring, and reviewed VCAS, adding a 10 Minute Bypass. Advised member to attempt transaction again.';
+      if (resultSentence) sentence += ` ${resultSentence}`;
+      sentence += ' Turned FM back on.';
       if (row.result === 'fail') sentence += ' Advised to reach out to merchant.';
       return sentence;
     }
@@ -1262,7 +1335,7 @@ function renderSignatureField(group, key, values = fieldValues) {
   const inp = document.createElement('textarea');
   inp.rows = 2;
   inp.style.resize = 'vertical';
-  inp.placeholder = 'e.g. SOrazco\nStephanie Orazco';
+  inp.placeholder = 'e.g. <NAME/INITIALS YOU WANT HERE>';
   inp.value = values[key] || '';
 
   const hint = document.createElement('div');
