@@ -1133,41 +1133,55 @@ function makeActionLogRow(row, ri, rows, rowTypes) {
   if (rt && rt.detailField !== 'none') {
     if (rt.detailField === 'verification-chips') {
       if (!Array.isArray(row.detail)) row.detail = [];
-      const chips = document.createElement('div');
-      chips.className = 'chips';
-      chips.style.marginBottom = '6px';
-      // The same method can't verify the member twice for one call — gray out (and make
-      // non-clickable) whichever option(s) the outer VERIFICATION field already used. Always read
-      // the true global fieldValues here, never the threaded `values` param: VERIFICATION lives on
-      // the outer universal-note itself, which is a different store than a walkthrough's own local
-      // fieldValues when this row is rendered inside one (see renderWalkthroughForm) — reading it
-      // fresh on every render (rather than caching it on the row) is what makes this reactive to
-      // the outer field changing later (see its click handler below, which re-renders everything).
+      // Always read the true global fieldValues here, never the threaded `values` param:
+      // VERIFICATION lives on the outer universal-note itself, which is a different store than a
+      // walkthrough's own local fieldValues when this row is rendered inside one (see
+      // renderWalkthroughForm) — reading it fresh on every render (rather than caching it on the
+      // row) is what makes both checks below reactive to the outer field changing later (see its
+      // click handler, which re-renders everything on change).
       const outerVerification = fieldValues['VERIFICATION'];
       const usedElsewhere = Array.isArray(outerVerification) ? outerVerification : (outerVerification ? [outerVerification] : []);
-      VERIFICATION_CHIP_OPTIONS.forEach(opt => {
-        const chip = document.createElement('button');
-        chip.type = 'button';
-        const isSelected = row.detail.includes(opt);
-        const isDisabled = usedElsewhere.includes(opt);
-        chip.className = 'chip' + (isSelected ? ' selected' : '');
-        chip.textContent = opt;
-        // A chip already selected/saved before it became disabled stays visibly selected (never
-        // silently cleared) — it's just locked: no click listener at all, so it can neither be
-        // toggled off (and then be unable to re-add, since it'd be disabled) nor re-selected.
-        if (isDisabled) {
-          chip.disabled = true;
-        } else {
-          chip.addEventListener('click', () => {
-            const idx = row.detail.indexOf(opt);
-            if (idx >= 0) row.detail.splice(idx, 1); else row.detail.push(opt);
-            renderFields();
-            updatePreview();
-          });
-        }
-        chips.appendChild(chip);
-      });
-      card.appendChild(chips);
+
+      // Takeover-specific: IDV already verifying the member up top is sufficient on its own — no
+      // re-verification is needed at all when taking over, so hide the WHOLE chip selector rather
+      // than just disabling the IDV chip. This is a render-time decision based purely on the
+      // current outer VERIFICATION value; it never clears row.detail, so any chip selection
+      // already saved there reappears exactly as it was if VERIFICATION ever loses IDV again, and
+      // still resolves correctly even while the selector is hidden (see resolveActionLogRow's
+      // 'takeover' case, which only uses the "spoke with member directly" wording when row.detail
+      // is actually empty).
+      const skipChipSelectorForTakeover = row.type === 'takeover' && usedElsewhere.includes('IDV');
+
+      if (!skipChipSelectorForTakeover) {
+        const chips = document.createElement('div');
+        chips.className = 'chips';
+        chips.style.marginBottom = '6px';
+        // The same method can't verify the member twice for one call — gray out (and make
+        // non-clickable) whichever option(s) the outer VERIFICATION field already used.
+        VERIFICATION_CHIP_OPTIONS.forEach(opt => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          const isSelected = row.detail.includes(opt);
+          const isDisabled = usedElsewhere.includes(opt);
+          chip.className = 'chip' + (isSelected ? ' selected' : '');
+          chip.textContent = opt;
+          // A chip already selected/saved before it became disabled stays visibly selected (never
+          // silently cleared) — it's just locked: no click listener at all, so it can neither be
+          // toggled off (and then be unable to re-add, since it'd be disabled) nor re-selected.
+          if (isDisabled) {
+            chip.disabled = true;
+          } else {
+            chip.addEventListener('click', () => {
+              const idx = row.detail.indexOf(opt);
+              if (idx >= 0) row.detail.splice(idx, 1); else row.detail.push(opt);
+              renderFields();
+              updatePreview();
+            });
+          }
+          chips.appendChild(chip);
+        });
+        card.appendChild(chips);
+      }
     } else {
       const inp = document.createElement('input');
       inp.type = 'text';
@@ -1294,6 +1308,14 @@ function resolveActionLogRow(row, rt, rowTypes, precededByVrol) {
       // whichever row follows it, typically suppression. resultSentence is deliberately unused
       // here (there's nothing to attach it to on this row).
       const chips = Array.isArray(row.detail) ? row.detail.join('/') : '';
+      // If the row has no chip selection, that's either because IDV up top already covered
+      // verification (the chip selector is hidden in that case — see makeActionLogRow) or simply
+      // because none was picked. Either way, "spoke with member directly" reads correctly and
+      // never claims a re-verification method that wasn't actually used. A saved selection is
+      // always honored here regardless of the outer VERIFICATION value — this only checks
+      // row.detail itself, so a chip picked before IDV was added still resolves via "{chips}"
+      // even while its selector is currently hidden.
+      if (!chips) return 'Took over call and spoke with member directly.';
       return `Took over call and further verified member via ${chips}.`;
     }
 
@@ -1303,7 +1325,7 @@ function resolveActionLogRow(row, rt, rowTypes, precededByVrol) {
         // cleanup happens once the outcome is known, never before — merchant referral last on fail.
         let sentence = resultSentence ? `${resultSentence} ` : '';
         sentence += 'Turned FM back on.';
-        if (row.result === 'fail') sentence += ' Advised to reach out to merchant.';
+        if (row.result === 'fail') sentence += ' Advised to reach out to merchant or try again tomorrow.';
         return sentence;
       }
       // Combined with VCAS: this row now covers the whole turn-off / bypass / attempt /
@@ -1313,7 +1335,7 @@ function resolveActionLogRow(row, rt, rowTypes, precededByVrol) {
       let sentence = 'Received permission to turn off Fraud monitoring, and reviewed VCAS, adding a 10 Minute Bypass. Advised member to attempt transaction again.';
       if (resultSentence) sentence += ` ${resultSentence}`;
       sentence += ' Turned FM back on.';
-      if (row.result === 'fail') sentence += ' Advised to reach out to merchant.';
+      if (row.result === 'fail') sentence += ' Advised to reach out to merchant or try again tomorrow.';
       return sentence;
     }
 

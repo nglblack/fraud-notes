@@ -140,10 +140,10 @@
               "placeholder": "e.g. $245 recurring gym membership, mbr says it's their usual monthly charge"
             },
             {
-              "key": "PRIOR_RF",
-              "label": "RF Already Adjusted by Other Agent (if any)",
+              "key": "PRIOR_ACTIONS",
+              "label": "What's Already Been Done (per other agent, if any)",
               "type": "text",
-              "placeholder": "e.g. ONL"
+              "placeholder": "e.g. reviewed Falcon, checked VROL, adjusted OV RF ONL"
             },
             {
               "key": "ACTIONS",
@@ -161,7 +161,7 @@
             }
           ],
           "produces": {
-            "ISSUE": "Mbr calling about transaction {{TRANSACTION_DETAIL}} on card ending {{CARD_LAST4}}.{{#IF_SET_PRIOR_RF}} Agent already adjusted RF: {{PRIOR_RF}}.{{/IF_SET_PRIOR_RF}}",
+            "ISSUE": "Mbr calling about transaction {{TRANSACTION_DETAIL}} on card ending {{CARD_LAST4}}.{{#IF_SET_PRIOR_ACTIONS}} Per other agent, already reviewed: {{PRIOR_ACTIONS}}.{{/IF_SET_PRIOR_ACTIONS}}",
             "ACTION_TAKEN": "{{ACTIONS}}",
             "ADVICE": ""
           }
